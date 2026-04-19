@@ -34,7 +34,7 @@
                     <i class="bi bi-grid-1x2-fill nav-icon"></i>
                     <span>Dashboard</span>
                 </a>
-                <a class="nav-link" href="{{ url('/admin/cashiers') }}">
+                <a class="nav-link active" href="{{ url('/admin/cashiers') }}">
                     <i class="bi bi-people nav-icon"></i>
                     <span>Cashiers</span>
                 </a>
@@ -54,7 +54,7 @@
                     <i class="bi bi-receipt nav-icon"></i>
                     <span>View Orders</span>
                 </a>
-                <a class="nav-link active" href="{{ url('/admin/products') }}">
+                <a class="nav-link" href="{{ url('/admin/products') }}">
                     <i class="bi bi-box-seam nav-icon"></i>
                     <span>Product List</span>
                 </a>
@@ -117,38 +117,32 @@
 
         <!-- Page Header -->
         <div class="page-header">
-            <h2>Products</h2>
+            <h2>Cashiers</h2>
         </div>
 
         <!-- â”€â”€ Recent Training Progress Table â”€â”€ -->
         <div class="panel">
             <div class="panel-header">
                 <div>
-                    <p class="panel-title">Product List</p>
+                    <p class="panel-title">Cashiers List</p>
                 </div>
-                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addProductModal">
-                    <i class="bi bi-plus"></i> Add Product
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addCashierModal">
+                    <i class="bi bi-plus"></i> Add Cashier
                 </button>
             </div>
 
             <div style="overflow-x:auto;">
-                <table class="data-table" id="productTable">
+                <table class="data-table" id="cashiersTable">
                     <thead>
                         <tr>
-                            <th>Barcode</th>
-                            <th>Product Image</th>
-                            <th>Product Name</th>
-                            <th>Description</th>
-                            <th>Selling Price</th>
-                            <th>Supplier Price</th>
+                            <th>Fullname</th>
+                            <th>Email</th>
+                            <th>Password</th>
                             <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <td>Test</td>
-                            <td>Test</td>
-                            <td>Test</td>
                             <td>Test</td>
                             <td>Test</td>
                             <td>Test</td>
@@ -176,29 +170,29 @@
     <script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js"></script>
     <script src="{{ asset('assets/script.js') }}"></script>
     <script>
-        const productTableElement = document.getElementById('productTable');
-        let productDataTable;
+        const cashiersTableElement = document.getElementById('cashiersTable');
+        let cashiersDataTable;
 
-        function initproductDataTable() {
-            if (!productTableElement || !window.jQuery || !window.jQuery.fn.DataTable) {
+        function initcashiersDataTable() {
+            if (!cashiersTableElement || !window.jQuery || !window.jQuery.fn.DataTable) {
                 return;
             }
 
-            if (productDataTable) {
-                productDataTable.destroy();
+            if (cashiersDataTable) {
+                cashiersDataTable.destroy();
             }
 
-            productDataTable = window.jQuery(productTableElement).DataTable({
+            cashiersDataTable = window.jQuery(cashiersTableElement).DataTable({
                 pageLength: 10,
                 order: [
-                    [4, 'desc']
+                    [0, 'desc']
                 ],
                 autoWidth: false,
             });
         }
 
 
-        initproductDataTable();
+        initcashiersDataTable();
     </script>
 </body>
 

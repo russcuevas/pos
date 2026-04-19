@@ -23,7 +23,7 @@ created_at
 updated_at
 
 products - table
-barcode
+product_code
 product_image
 product_name
 product_description

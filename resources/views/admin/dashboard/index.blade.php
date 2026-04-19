@@ -34,6 +34,10 @@
                     <i class="bi bi-grid-1x2-fill nav-icon"></i>
                     <span>Dashboard</span>
                 </a>
+                <a class="nav-link" href="{{ url('/admin/cashiers') }}">
+                    <i class="bi bi-people nav-icon"></i>
+                    <span>Cashiers</span>
+                </a>
                 <a class="nav-link" href="{{ url('/admin/pos') }}">
                     <i class="bi bi-cart-check nav-icon"></i>
                     <span>POS</span>
