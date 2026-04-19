@@ -30,7 +30,14 @@ Route::get('/admin/login', [AuthController::class, 'AdminLoginPage'])->name('adm
 
 // ADMIN DASHBOARD
 Route::get('/admin/dashboard', [AdminDashboardController::class, 'AdminDashboardPage'])->name('admin.dashboard.page');
+
+// ADMIN CASHIER CRUD
 Route::get('/admin/cashiers', [AdminCashiersController::class, 'AdminCashiersPage'])->name('admin.cashiers.page');
+Route::post('/admin/cashiers/create', [AdminCashiersController::class, 'AdminCashiersCreate'])->name('admin.cashiers.create');
+Route::put('/admin/cashiers/{id}/update', [AdminCashiersController::class, 'AdminCashiersUpdate'])->name('admin.cashiers.update');
+Route::delete('/admin/cashiers/{id}/delete', [AdminCashiersController::class, 'AdminCashiersDelete'])->name('admin.cashiers.delete');
+
+
 Route::get('/admin/pos', [AdminPOSController::class, 'AdminPOSPage'])->name('admin.pos.page');
 Route::get('/admin/products', [AdminProductsController::class, 'AdminProductsPage'])->name('admin.products.page');
 Route::get('/admin/inventory', [AdminInventoryController::class, 'AdminInventoryPage'])->name('admin.inventory.page');
