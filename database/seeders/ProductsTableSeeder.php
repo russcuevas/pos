@@ -21,6 +21,8 @@ class ProductsTableSeeder extends Seeder
             'selling_price' => 10,
             'supplier_price' => 5,
             'quantity' => 100,
+            'whole_sale_qty' => 10,
+            'whole_sale_price' => 50,
             'is_show' => true,
         ]);
 
@@ -32,6 +34,8 @@ class ProductsTableSeeder extends Seeder
             'selling_price' => 20,
             'supplier_price' => 10,
             'quantity' => 200,
+            'whole_sale_qty' => 20,
+            'whole_sale_price' => 50,
             'is_show' => false,
         ]);
     }

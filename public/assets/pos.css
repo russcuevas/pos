@@ -315,5 +315,103 @@
 }
 
 .order-pane {
-    background: #fff !important;
+    background: var(--white) !important;
+}
+
+/* ════════════════════════════════════════════════════════════
+   DARK MODE ENHANCEMENTS FOR POS
+════════════════════════════════════════════════════════════ */
+
+body.dark-mode .order-total-bar {
+    background: #0f172a;
+    border: 1px solid var(--border);
+}
+
+body.dark-mode .alpha-row input[type="radio"]:checked+.alpha-lbl {
+    background: rgba(248, 113, 113, 0.15);
+    border-color: var(--cobalt);
+    color: var(--cobalt);
+    box-shadow: 0 2px 12px rgba(239, 68, 68, 0.2);
+}
+
+body.dark-mode .alpha-row input[type="radio"]:checked+.alpha-lbl:hover {
+    color: #fff;
+    background: var(--cobalt);
+}
+
+body.dark-mode .pcard-img {
+    background: #1e293b;
+}
+
+body.dark-mode .pcard-thumb {
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+}
+
+body.dark-mode .bot-btn.cam {
+    background: #0284c7;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode .bot-btn.cam:hover {
+    background: #0369a1;
+}
+
+body.dark-mode .bot-btn.cust {
+    background: #4f46e5;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode .bot-btn.cust:hover {
+    background: #4338ca;
+}
+
+body.dark-mode .bot-btn.sav {
+    background: #d97706;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode .bot-btn.sav:hover {
+    background: #b45309;
+}
+
+body.dark-mode .btn-checkout {
+    background: #16a34a;
+    box-shadow: 0 14px 32px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode .btn-checkout:hover {
+    background: #15803d;
+    box-shadow: 0 16px 34px rgba(0, 0, 0, 0.4);
+}
+
+body.dark-mode .btn-checkout:disabled {
+    background: var(--border);
+    color: var(--text-muted);
+}
+
+body.dark-mode .cart-fab {
+    background: #16a34a;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+body.dark-mode .cart-fab:hover {
+    background: #15803d;
+}
+
+body.dark-mode .top-nav {
+    background: #0f172a;
+    border-bottom: 1px solid var(--border);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+body.dark-mode .nav-pill.active {
+    background: #1e293b;
+    color: #fff;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode .nav-badge {
+    background: #ef4444;
+    color: #fff;
+    border-color: #0f172a;
 }

@@ -19,7 +19,9 @@ return new class extends Migration
             $table->string('product_image');
             $table->decimal('selling_price', 10, 2);
             $table->decimal('supplier_price', 10, 2);
-            $table->integer('quantity');
+            $table->integer('quantity')->nullable();
+            $table->integer('whole_sale_qty');
+            $table->decimal('whole_sale_price', 10, 2);
             $table->boolean('is_show')->default(true);
             $table->timestamps();
         });
