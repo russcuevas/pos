@@ -40,7 +40,14 @@ Route::middleware(['admin'])->group(function () {
     Route::put('/admin/cashiers/{id}/update', [AdminCashiersController::class, 'AdminCashiersUpdate'])->name('admin.cashiers.update');
     Route::delete('/admin/cashiers/{id}/delete', [AdminCashiersController::class, 'AdminCashiersDelete'])->name('admin.cashiers.delete');
 
+    // ADMIN POS
     Route::get('/admin/pos', [AdminPOSController::class, 'AdminPOSPage'])->name('admin.pos.page');
+    Route::post('/admin/pos/cart/add', [AdminPOSController::class, 'AdminAddToCart'])->name('admin.pos.cart.add');
+    Route::post('/admin/pos/cart/custom', [AdminPOSController::class, 'AdminAddCustomCart'])->name('admin.pos.cart.custom');
+    Route::post('/admin/pos/cart/{id}/update', [AdminPOSController::class, 'AdminUpdateCart'])->name('admin.pos.cart.update');
+    Route::delete('/admin/pos/cart/{id}/delete', [AdminPOSController::class, 'AdminDeleteCart'])->name('admin.pos.cart.delete');
+    Route::post('/admin/pos/cart/checkout', [AdminPOSController::class, 'AdminCheckout'])->name('admin.pos.cart.checkout');
+
     Route::get('/admin/products', [AdminProductsController::class, 'AdminProductsPage'])->name('admin.products.page');
     Route::post('/admin/products/create', [AdminProductsController::class, 'AdminProductsCreate'])->name('admin.products.create');
     Route::put('/admin/products/{id}/update', [AdminProductsController::class, 'AdminProductsUpdate'])->name('admin.products.update');

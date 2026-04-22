@@ -16,7 +16,9 @@ return new class extends Migration
             $table->foreignId('cashier_id')->nullable()->constrained('cashiers')->onDelete('cascade');
             $table->foreignId('admin_id')->nullable()->constrained('admins')->onDelete('cascade');
             $table->foreignId('product_id')->nullable()->constrained('products')->onDelete('cascade');
-            $table->integer('quantity');
+            $table->string('custom_entry')->nullable();
+            $table->decimal('custom_price', 10, 2)->nullable();
+            $table->decimal('quantity', 10, 2);
             $table->timestamps();
         });
     }

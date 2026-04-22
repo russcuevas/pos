@@ -192,7 +192,10 @@
     <script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js"></script>
     <script>
         const notyf = new Notyf({
-            position: { x: 'right', y: 'top' },
+            position: {
+                x: 'right',
+                y: 'top'
+            },
             duration: 3000
         });
 

@@ -16,10 +16,12 @@ return new class extends Migration
             $table->string('order_number');
             $table->foreignId('customer_id')->nullable()->constrained('customers')->onDelete('cascade');
             $table->foreignId('products_id')->nullable()->constrained('products')->onDelete('cascade');
+            $table->string('custom_entry')->nullable();
+            $table->decimal('custom_price', 10, 2)->nullable();
             $table->string('customer_name')->nullable();
             $table->string('customer_phone')->nullable();
             $table->text('address')->nullable();
-            $table->integer('quantity');
+            $table->decimal('quantity', 10, 2);
             $table->decimal('discount_price', 10, 2)->default(0);
             $table->decimal('total_price', 10, 2);
             $table->decimal('payment_amount', 10, 2)->nullable();

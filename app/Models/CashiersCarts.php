@@ -13,6 +13,8 @@ class CashiersCarts extends Model
         'admin_id',
         'cashier_id',
         'product_id',
-        'quantity',
+        'custom_entry',
+        'custom_price',
+        'quantity'
     ];
 }
