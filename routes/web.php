@@ -44,6 +44,9 @@ Route::middleware(['admin'])->group(function () {
     Route::get('/admin/pos', [AdminPOSController::class, 'AdminPOSPage'])->name('admin.pos.page');
     Route::post('/admin/pos/cart/add', [AdminPOSController::class, 'AdminAddToCart'])->name('admin.pos.cart.add');
     Route::post('/admin/pos/cart/custom', [AdminPOSController::class, 'AdminAddCustomCart'])->name('admin.pos.cart.custom');
+    Route::post('/admin/pos/cart/save', [AdminPOSController::class, 'AdminSaveOrder'])->name('admin.pos.cart.save');
+    Route::post('/admin/pos/saved-order/{reference}/load', [AdminPOSController::class, 'AdminLoadSavedOrder'])->name('admin.pos.saved.load');
+    Route::delete('/admin/pos/saved-order/{reference}/delete', [AdminPOSController::class, 'AdminDeleteSavedOrder'])->name('admin.pos.saved.delete');
     Route::post('/admin/pos/cart/{id}/update', [AdminPOSController::class, 'AdminUpdateCart'])->name('admin.pos.cart.update');
     Route::delete('/admin/pos/cart/{id}/delete', [AdminPOSController::class, 'AdminDeleteCart'])->name('admin.pos.cart.delete');
     Route::post('/admin/pos/cart/checkout', [AdminPOSController::class, 'AdminCheckout'])->name('admin.pos.cart.checkout');

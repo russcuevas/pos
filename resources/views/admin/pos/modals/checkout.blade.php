@@ -43,8 +43,15 @@
                     <!-- Total -->
                     <div class="text-center mb-4">
                         <div style="color: var(--text-secondary); font-size: 0.9em;">Total Amount Due</div>
-                        <h2 class="fw-bold text-primary mb-0" id="checkoutTotalDisplay">
-                            ₱{{ number_format($subtotal, 2) }}</h2>
+                        <div class="d-flex flex-column align-items-center justify-content-center mt-1">
+                            <span id="originalTotalDisplay" class="text-muted text-decoration-line-through d-none" style="font-size: 1.1rem; margin-bottom: -5px;">
+                                ₱{{ number_format($subtotal, 2) }}
+                            </span>
+                            <h2 class="fw-bold text-primary mb-0" id="checkoutTotalDisplay">
+                                ₱{{ number_format($subtotal, 2) }}
+                            </h2>
+                        </div>
+                        <div id="discountAmountDisplay" class="text-danger small fw-bold d-none mt-1"></div>
                         <input type="hidden" name="total_price" id="checkoutTotalInput"
                             value="{{ $subtotal }}">
                     </div>

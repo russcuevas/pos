@@ -94,8 +94,14 @@
                     <a href="#" class="nav-icon-pill">
                         <i class="bi bi-printer"></i>
                     </a>
-                    <div class="admin-chip"><i class="bi bi-shield-check"></i> ADMINISTRATOR</div>
-                    <a href="" class="nav-icon-pill"><i class="bi bi-box-arrow-right"></i></a>
+                    <div class="admin-chip"><i class="bi bi-shield-check"></i>
+                        {{ strtoupper(Auth::guard('admin')->user()->fullname) }}</div>
+                    <form action="{{ route('admin.logout') }}" method="POST">
+                        @csrf
+                        <button type="submit" class="nav-icon-pill border-0 bg-transparent" style="color: white;">
+                            <i class="bi bi-box-arrow-right"></i>
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>
@@ -291,7 +297,13 @@
                     <button class="bot-btn cam"><i class="bi bi-camera"></i> Camera</button>
                     <button class="bot-btn cust" data-bs-toggle="modal" data-bs-target="#customItemModal"><i
                             class="bi bi-plus-circle"></i> Custom</button>
-                    <button class="bot-btn sav"><i class="bi bi-folder2-open"></i> Saved</button>
+                    @if ($cartItems->isEmpty())
+                        <button class="bot-btn sav w-100" data-bs-toggle="modal"
+                            data-bs-target="#savedOrdersModal"><i class="bi bi-folder2-open"></i> Saved</button>
+                    @else
+                        <button class="bot-btn w-100" type="button" id="saveOrderBtn"><i class="bi bi-save"></i>
+                            Save</button>
+                    @endif
                 </div>
             </div>
 
@@ -306,8 +318,12 @@
         <span class="cart-fab-badge">{{ $cartItems->count() }}</span>
     </button>
 
-    <script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js"></script>
 
+
+    <script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    @include('admin.pos.modals.saved_item')
     @include('admin.pos.modals.quantity')
     @include('admin.pos.modals.checkout')
     @include('admin.pos.modals.custom_item')
@@ -419,11 +435,27 @@
             }
 
             if (discountInput) {
+                const originalTotalDisplay = document.getElementById('originalTotalDisplay');
+                const discountAmountDisplay = document.getElementById('discountAmountDisplay');
+
                 discountInput.addEventListener('input', function() {
                     const discount = parseFloat(this.value) || 0;
                     const newTotal = Math.max(0, baseTotal - discount);
                     checkoutTotalInput.value = newTotal;
                     checkoutTotalDisplay.textContent = '₱' + newTotal.toFixed(2);
+
+                    if (discount > 0) {
+                        if (originalTotalDisplay) originalTotalDisplay.classList.remove('d-none');
+                        if (discountAmountDisplay) {
+                            discountAmountDisplay.textContent = '- ₱' + discount.toFixed(2) +
+                                ' Discount Applied';
+                            discountAmountDisplay.classList.remove('d-none');
+                        }
+                    } else {
+                        if (originalTotalDisplay) originalTotalDisplay.classList.add('d-none');
+                        if (discountAmountDisplay) discountAmountDisplay.classList.add('d-none');
+                    }
+
                     if (paymentAmountInput) {
                         paymentAmountInput.value = Math.ceil(newTotal);
                     }
@@ -487,6 +519,32 @@
                         profitHidden.classList.remove('d-none');
                         toggleProfitBtn.classList.replace('bi-eye-fill', 'bi-eye-slash-fill');
                     }
+                });
+            }
+
+            // Save Order logic
+            const saveOrderBtn = document.getElementById('saveOrderBtn');
+            if (saveOrderBtn) {
+                saveOrderBtn.addEventListener('click', function() {
+                    const hasItems = {{ $cartItems->isEmpty() ? 'false' : 'true' }};
+                    if (!hasItems) {
+                        notyf.error('Cart is empty!');
+                        return;
+                    }
+
+                    Swal.fire({
+                        title: 'Save Order?',
+                        text: "Are you sure you want to save this order?",
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonColor: '#3085d6',
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: 'Yes, save it!'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            document.getElementById('saveOrderForm').submit();
+                        }
+                    });
                 });
             }
         });

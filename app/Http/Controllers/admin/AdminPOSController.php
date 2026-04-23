@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Products;
 use App\Models\CashiersCarts;
 use App\Models\Orders;
+use App\Models\SaveOrders;
 use Illuminate\Support\Facades\Auth;
 
 class AdminPOSController extends Controller
@@ -52,7 +53,15 @@ class AdminPOSController extends Controller
 
         $profit = $subtotal - $total_cost;
 
-        return view('admin.pos.index', compact('products', 'cartItems', 'subtotal', 'profit'));
+        $savedOrdersData = SaveOrders::where('admin_id', $admin_id)
+            ->leftJoin('products', 'save_orders.product_id', '=', 'products.id')
+            ->select('save_orders.*', 'products.product_name', 'products.product_image', 'products.selling_price')
+            ->orderBy('save_orders.created_at', 'desc')
+            ->get();
+
+        $savedOrders = $savedOrdersData->groupBy('reference_save_order');
+
+        return view('admin.pos.index', compact('products', 'cartItems', 'subtotal', 'profit', 'savedOrders'));
     }
 
     public function AdminAddToCart(Request $request)
@@ -206,5 +215,92 @@ class AdminPOSController extends Controller
         ]);
 
         return back()->with('success', 'Custom item added!');
+    }
+
+    public function AdminSaveOrder()
+    {
+        $admin_id = Auth::guard('admin')->id();
+        $cartItems = CashiersCarts::where('admin_id', $admin_id)->get();
+
+        if ($cartItems->isEmpty()) {
+            return back()->with('error', 'Cart is empty!');
+        }
+
+        $reference = 'SO-' . strtoupper(uniqid());
+
+        foreach ($cartItems as $item) {
+            SaveOrders::create([
+                'reference_save_order' => $reference,
+                'cashier_id' => null,
+                'admin_id' => $admin_id,
+                'product_id' => $item->product_id,
+                'custom_entry' => $item->custom_entry,
+                'custom_price' => $item->custom_price,
+                'quantity' => $item->quantity,
+            ]);
+        }
+
+        CashiersCarts::where('admin_id', $admin_id)->delete();
+
+        return back()->with('success', 'Order saved successfully!');
+    }
+
+    public function AdminLoadSavedOrder($reference)
+    {
+        $admin_id = Auth::guard('admin')->id();
+        $savedItems = SaveOrders::where('reference_save_order', $reference)
+            ->where('admin_id', $admin_id)
+            ->get();
+
+        if ($savedItems->isEmpty()) {
+            return back()->with('error', 'Saved order not found!');
+        }
+
+        foreach ($savedItems as $item) {
+            if ($item->product_id) {
+                $cartItem = CashiersCarts::where('admin_id', $admin_id)
+                    ->where('product_id', $item->product_id)
+                    ->first();
+
+                if ($cartItem) {
+                    $cartItem->quantity += $item->quantity;
+                    $cartItem->save();
+                } else {
+                    CashiersCarts::create([
+                        'admin_id' => $admin_id,
+                        'cashier_id' => null,
+                        'product_id' => $item->product_id,
+                        'custom_entry' => null,
+                        'custom_price' => null,
+                        'quantity' => $item->quantity,
+                    ]);
+                }
+            } else {
+                CashiersCarts::create([
+                    'admin_id' => $admin_id,
+                    'cashier_id' => null,
+                    'product_id' => null,
+                    'custom_entry' => $item->custom_entry,
+                    'custom_price' => $item->custom_price,
+                    'quantity' => $item->quantity,
+                ]);
+            }
+        }
+
+        SaveOrders::where('reference_save_order', $reference)
+            ->where('admin_id', $admin_id)
+            ->delete();
+
+        return back()->with('success', 'Saved order loaded to cart!');
+    }
+
+    public function AdminDeleteSavedOrder($reference)
+    {
+        $admin_id = Auth::guard('admin')->id();
+        SaveOrders::where('reference_save_order', $reference)
+            ->where('admin_id', $admin_id)
+            ->delete();
+
+        return back()->with('success', 'Saved order deleted!');
     }
 }
