@@ -31,7 +31,7 @@
                 <div class="stat-card">
                     <div class="stat-icon purple"><i class="bi bi-boxes"></i></div>
                     <div class="stat-body">
-                        <div class="stat-value">1</div>
+                        <div class="stat-value">{{ $totalProducts }}</div>
                         <div class="stat-label">Total Products</div>
                     </div>
                 </div>
@@ -40,7 +40,7 @@
                 <div class="stat-card">
                     <div class="stat-icon green"><i class="bi bi-shield-check"></i></div>
                     <div class="stat-body">
-                        <div class="stat-value">2</div>
+                        <div class="stat-value">{{ $safeCount }}</div>
                         <div class="stat-label">Safe</div>
                     </div>
                 </div>
@@ -49,7 +49,7 @@
                 <div class="stat-card">
                     <div class="stat-icon amber"><i class="bi bi-exclamation-triangle"></i></div>
                     <div class="stat-body">
-                        <div class="stat-value">3</div>
+                        <div class="stat-value">{{ $lowCount }}</div>
                         <div class="stat-label">Low</div>
                     </div>
                 </div>
@@ -58,7 +58,7 @@
                 <div class="stat-card">
                     <div class="stat-icon cobalt"><i class="bi bi-exclamation-octagon-fill"></i></div>
                     <div class="stat-body">
-                        <div class="stat-value">2</div>
+                        <div class="stat-value">{{ $criticalCount }}</div>
                         <div class="stat-label">Critical</div>
                     </div>
                 </div>
@@ -87,37 +87,53 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>
-                                <div class="d-flex align-items-center gap-3">
-                                    <div class="product-thumb"
-                                        style="width: 52px; height: 52px; border-radius: 12px; overflow: hidden; background: var(--border); flex-shrink: 0; box-shadow: var(--shadow-sm);">
-                                        <img src="https://tse4.mm.bing.net/th/id/OIP.rWR-uAUTI2Es1uZKtvMgmQHaE8?pid=Api&P=0&h=180"
-                                            alt="Product" style="width: 100%; height: 100%; object-fit: cover;">
-                                    </div>
-                                    <div>
-                                        <div class="product-title"
-                                            style="font-weight: 700; color: var(--mine-shaft); font-size: 0.95rem; margin-bottom: 4px; line-height: 1.2;">
-                                            Century Tuna Flakes in Oil</div>
-                                        <div class="d-flex align-items-center gap-2"
-                                            style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">
-                                            <span
-                                                style="background: rgba(16, 185, 129, 0.15); color: #059669; padding: 2px 8px; border-radius: 6px; border: 1px solid rgba(16, 185, 129, 0.2);">Stock:
-                                                125</span>
-                                            <span>•</span>
-                                            <span>Sold: 42 this month</span>
+                        @foreach ($products as $product)
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="product-thumb"
+                                            style="width: 52px; height: 52px; border-radius: 12px; overflow: hidden; background: var(--border); flex-shrink: 0; box-shadow: var(--shadow-sm); display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
+                                            @if ($product->product_image)
+                                                <img src="{{ asset('images/products/' . $product->product_image) }}"
+                                                    alt="{{ $product->product_name }}"
+                                                    style="width: 100%; height: 100%; object-fit: cover;">
+                                            @else
+                                                📦
+                                            @endif
+                                        </div>
+                                        <div>
+                                            <div class="product-title"
+                                                style="font-weight: 700; color: var(--mine-shaft); font-size: 0.95rem; margin-bottom: 4px; line-height: 1.2;">
+                                                {{ $product->product_name }}</div>
+                                            <div class="d-flex align-items-center gap-2"
+                                                style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">
+                                                @if ($product->quantity <= 10)
+                                                    <span
+                                                        style="background: rgba(239, 68, 68, 0.15); color: #dc2626; padding: 2px 8px; border-radius: 6px; border: 1px solid rgba(239, 68, 68, 0.2);">Stock:
+                                                        {{ number_format($product->quantity, 0) }}</span>
+                                                @elseif($product->quantity <= 50)
+                                                    <span
+                                                        style="background: rgba(245, 158, 11, 0.15); color: #d97706; padding: 2px 8px; border-radius: 6px; border: 1px solid rgba(245, 158, 11, 0.2);">Stock:
+                                                        {{ number_format($product->quantity, 0) }}</span>
+                                                @else
+                                                    <span
+                                                        style="background: rgba(16, 185, 129, 0.15); color: #059669; padding: 2px 8px; border-radius: 6px; border: 1px solid rgba(16, 185, 129, 0.2);">Stock:
+                                                        {{ number_format($product->quantity, 0) }}</span>
+                                                @endif
+                                                <span>•</span>
+                                                <span>Sold: {{ number_format($product->sold_this_month, 0) }} this month</span>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            </td>
-                            <td>
-                                <button class="btn btn-primary" data-bs-toggle="modal"
-                                    data-bs-target="#editProductModal">
-                                    <i class="bi bi-plus"></i>
-                                </button>
-                            </td>
-                        </tr>
-
+                                </td>
+                                <td>
+                                    <button class="btn btn-primary" data-bs-toggle="modal"
+                                        data-bs-target="#editProductModal{{ $product->id }}">
+                                        <i class="bi bi-plus"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        @endforeach
                     </tbody>
                 </table>
             </div>

@@ -811,9 +811,6 @@ body.sidebar-mini .sidebar:hover .nav-link.active::before {
 .oi-name {
     font-size: .84rem;
     font-weight: 700;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
 }
 
 .oi-sub {
