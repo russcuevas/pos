@@ -3,6 +3,7 @@
 use App\Http\Controllers\admin\AdminCashiersController;
 use App\Http\Controllers\admin\AdminDashboardController;
 use App\Http\Controllers\admin\AdminInventoryController;
+use App\Http\Controllers\admin\AdminPendingOrdersController;
 use App\Http\Controllers\admin\AdminPOSController;
 use App\Http\Controllers\admin\AdminProductsController;
 use App\Http\Controllers\auth\AuthController;
@@ -51,9 +52,18 @@ Route::middleware(['admin'])->group(function () {
     Route::delete('/admin/pos/cart/{id}/delete', [AdminPOSController::class, 'AdminDeleteCart'])->name('admin.pos.cart.delete');
     Route::post('/admin/pos/cart/checkout', [AdminPOSController::class, 'AdminCheckout'])->name('admin.pos.cart.checkout');
 
+    // ADMIN PRODUCTS
     Route::get('/admin/products', [AdminProductsController::class, 'AdminProductsPage'])->name('admin.products.page');
     Route::post('/admin/products/create', [AdminProductsController::class, 'AdminProductsCreate'])->name('admin.products.create');
     Route::put('/admin/products/{id}/update', [AdminProductsController::class, 'AdminProductsUpdate'])->name('admin.products.update');
     Route::delete('/admin/products/{id}/delete', [AdminProductsController::class, 'AdminProductsDelete'])->name('admin.products.delete');
+
+    // ADMIN INVENTORY
     Route::get('/admin/inventory', [AdminInventoryController::class, 'AdminInventoryPage'])->name('admin.inventory.page');
+    Route::post('/admin/inventory/stock/{productId}/add', [AdminInventoryController::class, 'AdminAddStock'])->name('admin.inventory.addStock');
+    Route::put('/admin/inventory/stock/{historyId}/update', [AdminInventoryController::class, 'AdminUpdateStock'])->name('admin.inventory.updateStock');
+    Route::delete('/admin/inventory/stock/{historyId}/delete', [AdminInventoryController::class, 'AdminDeleteStock'])->name('admin.inventory.deleteStock');
+
+    // ADMIN PENDING ORDERS
+    Route::get('/admin/pending_orders', [AdminPendingOrdersController::class, 'AdminPendingOrdersPage'])->name('admin.pending_orders.page');
 });

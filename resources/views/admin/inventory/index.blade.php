@@ -13,6 +13,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <link rel="stylesheet" href="{{ asset('assets/style.css') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css">
 </head>
 
 <body>
@@ -128,8 +129,9 @@
                                 </td>
                                 <td>
                                     <button class="btn btn-primary" data-bs-toggle="modal"
-                                        data-bs-target="#editProductModal{{ $product->id }}">
-                                        <i class="bi bi-plus"></i>
+                                        data-bs-target="#stockManagementModal{{ $product->id }}"
+                                        style="width: 32px; height: 32px; padding: 0; display: flex; align-items: center; justify-content: center; border-radius: 8px; background: #0ea5e9; border: none;">
+                                        <i class="bi bi-plus" style="font-size: 1.2rem;"></i>
                                     </button>
                                 </td>
                             </tr>
@@ -141,9 +143,91 @@
 
     </main>
 
+    <!-- Stock Management Modals -->
+    @foreach ($products as $product)
+        <div class="modal fade stock-modal" id="stockManagementModal{{ $product->id }}" tabindex="-1"
+            aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Stock for {{ $product->product_name }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="stock-card">
+                            <p style="font-weight: 600; margin-bottom: 12px; font-size: 0.95rem;">Add
+                                New Stock</p>
+                            <form action="{{ route('admin.inventory.addStock', $product->id) }}" method="POST">
+                                @csrf
+                                <div class="stock-input-group">
+                                    <div class="stock-input-field">
+                                        <label>Quantity</label>
+                                        <input type="number" name="quantity" required placeholder="0">
+                                    </div>
+                                    <div class="stock-input-field">
+                                        <label>Cost per Item (₱)</label>
+                                        <input type="number" step="0.01" name="cost_price" required
+                                            value="{{ $product->supplier_price }}">
+                                    </div>
+                                    <button type="submit" class="btn-add-stock">Add Stock</button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <h6 class="stock-batches-title">Stock Batches</h6>
+
+                        <div class="stock-batches-list" style="max-height: 400px; overflow-y: auto; padding-right: 4px;">
+                            @forelse($product->stockHistory as $history)
+                                <div class="stock-batch-card">
+                                    <div class="stock-batch-header">
+                                        <span class="stock-batch-date">Received:
+                                            {{ $history->created_at->format('m/d/Y') }}</span>
+                                        <form action="{{ route('admin.inventory.deleteStock', $history->id) }}"
+                                            method="POST" onsubmit="return confirm('Are you sure?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn-delete-stock">
+                                                <i class="bi bi-trash3-fill"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                    <form action="{{ route('admin.inventory.updateStock', $history->id) }}"
+                                        method="POST">
+                                        @csrf
+                                        @method('PUT')
+                                        <div class="stock-input-group">
+                                            <div class="stock-input-field">
+                                                <label>Quantity</label>
+                                                <input type="number" name="quantity" value="{{ $history->quantity }}"
+                                                    required>
+                                            </div>
+                                            <div class="stock-input-field">
+                                                <label>Cost per Item</label>
+                                                <input type="number" step="0.01" name="cost_price"
+                                                    value="{{ $history->cost_price }}" required>
+                                            </div>
+                                            <button type="submit" class="btn-save-stock">Save</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            @empty
+                                <div class="text-center py-4 text-muted">
+                                    <i class="bi bi-box-seam d-block mb-2" style="font-size: 2rem; opacity: 0.3;"></i>
+                                    No stock batches found.
+                                </div>
+                            @endforelse
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endforeach
+
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js"></script>
     <script src="{{ asset('assets/script.js') }}"></script>
     <script>
         const productTableElement = document.getElementById('productTable');
@@ -169,6 +253,27 @@
 
 
         initproductDataTable();
+
+        // Notyf Toasts
+        const notyf = new Notyf({
+            position: {
+                x: 'right',
+                y: 'top',
+            },
+            duration: 3000
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            @if (session('success'))
+                notyf.success("{!! addslashes(session('success')) !!}");
+            @endif
+
+            @if ($errors->any())
+                @foreach ($errors->all() as $error)
+                    notyf.error("{!! addslashes($error) !!}");
+                @endforeach
+            @endif
+        });
     </script>
 </body>
 

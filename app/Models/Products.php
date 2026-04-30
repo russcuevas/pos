@@ -21,4 +21,8 @@ class Products extends Model
         'whole_sale_price',
         'is_show',
     ];
+    public function stockHistory()
+    {
+        return $this->hasMany(ProductStockHistory::class, 'product_id')->orderBy('created_at', 'desc');
+    }
 }
