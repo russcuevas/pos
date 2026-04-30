@@ -19,6 +19,7 @@ email
 password
 phone_number
 address
+is_verified
 created_at
 updated_at
 

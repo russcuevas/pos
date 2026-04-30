@@ -7,6 +7,7 @@ use App\Http\Controllers\admin\AdminPendingOrdersController;
 use App\Http\Controllers\admin\AdminPOSController;
 use App\Http\Controllers\admin\AdminProductsController;
 use App\Http\Controllers\auth\AuthController;
+use App\Http\Controllers\customers\CustomersHomeController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -29,6 +30,14 @@ Route::get('/', function () {
 Route::get('/admin/login', [AuthController::class, 'AdminLoginPage'])->name('admin.login.page');
 Route::post('/admin/login/request', [AuthController::class, 'AdminLoginRequest'])->name('admin.login.request');
 Route::post('/admin/logout', [AuthController::class, 'AdminLogout'])->name('admin.logout');
+
+// CUSTOMER AUTH
+Route::get('/customers/login', [AuthController::class, 'CustomerLoginPage'])->name('customers.login.page');
+Route::post('/customers/login/request', [AuthController::class, 'CustomerLoginRequest'])->name('customers.login.request');
+Route::get('/customers/register', [AuthController::class, 'CustomerRegisterPage'])->name('customers.register.page');
+Route::post('/customers/register/request', [AuthController::class, 'CustomerRegisterRequest'])->name('customers.register.request');
+Route::get('/customers/verify/{id}', [AuthController::class, 'VerifyCustomer'])->name('customers.verify');
+Route::post('/customers/logout', [AuthController::class, 'CustomerLogout'])->name('customers.logout');
 
 // ADMIN ROUTES
 Route::middleware(['admin'])->group(function () {
@@ -66,4 +75,9 @@ Route::middleware(['admin'])->group(function () {
 
     // ADMIN PENDING ORDERS
     Route::get('/admin/pending_orders', [AdminPendingOrdersController::class, 'AdminPendingOrdersPage'])->name('admin.pending_orders.page');
+});
+
+
+Route::middleware(['customer'])->group(function () {
+    Route::get('customers/home', [CustomersHomeController::class, 'CustomerHomePage'])->name('customers.home.page');
 });

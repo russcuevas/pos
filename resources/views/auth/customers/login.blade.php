@@ -23,9 +23,9 @@
             <div class="visual-content">
                 <img src="{{ asset('image/logo.png') }}" alt="POS Logo"
                     style="max-height: 80px; margin-bottom: 2rem; filter: brightness(0) invert(1);">
-                <h1>Empower Your Business.</h1>
-                <p>Advanced Point of Sale system designed for seamless transactions, real-time inventory tracking, and
-                    comprehensive analytics.</p>
+                <h1>Welcome to Our Store.</h1>
+                <p>Access your personalized dashboard to track your orders, manage your account, and enjoy a seamless
+                    shopping experience.</p>
             </div>
         </div>
 
@@ -35,11 +35,11 @@
                 <img src="{{ asset('image/logo.png') }}" alt="POS Logo" class="logo-mobile">
 
                 <div class="form-header">
-                    <h2>Admin Login</h2>
-                    <p>Welcome back, Please enter your details to sign in.</p>
+                    <h2>Customer Login</h2>
+                    <p>Welcome back! Please enter your details to access your account.</p>
                 </div>
 
-                <form action="{{ route('admin.login.request') }}" method="POST">
+                <form action="{{ route('customers.login.request') }}" method="POST">
                     @csrf
                     <div class="mb-4">
                         <label for="email" class="form-label">Email address</label>
@@ -61,7 +61,22 @@
                         </div>
                     </div>
 
+                    <div class="mb-4 d-flex justify-content-between align-items-center">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="remember" name="remember">
+                            <label class="form-check-label small" for="remember">
+                                Remember me
+                            </label>
+                        </div>
+                    </div>
+
                     <button type="submit" class="btn btn-brand">Sign in</button>
+
+                    <div class="text-center mt-4">
+                        <p class="small text-muted">Don't have an account? <a
+                                href="{{ route('customers.register.page') }}" class="text-brand fw-600">Sign
+                                up</a></p>
+                    </div>
                 </form>
             </div>
         </div>
@@ -74,14 +89,16 @@
         const togglePassword = document.querySelector('#togglePassword');
         const password = document.querySelector('#password');
 
-        togglePassword.addEventListener('click', function() {
-            const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
-            password.setAttribute('type', type);
-            this.querySelector('i').classList.toggle('bi-eye');
-            this.querySelector('i').classList.toggle('bi-eye-slash');
-        });
+        if (togglePassword) {
+            togglePassword.addEventListener('click', function() {
+                const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+                password.setAttribute('type', type);
+                this.querySelector('i').classList.toggle('bi-eye');
+                this.querySelector('i').classList.toggle('bi-eye-slash');
+            });
+        }
 
-        // Notyf Initialization with Custom Themes
+        // Notyf Initialization
         const notyf = new Notyf({
             position: {
                 x: 'right',
