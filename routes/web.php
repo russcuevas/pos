@@ -84,6 +84,8 @@ Route::middleware(['admin'])->group(function () {
     Route::post('/admin/pending_orders/cancel', [AdminPendingOrdersController::class, 'CancelOrder'])->name('admin.pending_orders.cancel');
     Route::post('/admin/pending_orders/start-preparing', [AdminPendingOrdersController::class, 'StartPreparing'])->name('admin.pending_orders.start_preparing');
     Route::post('/admin/pending_orders/mark-ready', [AdminPendingOrdersController::class, 'MarkAsReady'])->name('admin.pending_orders.mark_ready');
+    Route::get('/admin/pending_orders/check', [AdminPendingOrdersController::class, 'CheckNewOrders'])->name('admin.pending_orders.check');
+    Route::get('/admin/pending_orders/fetch-card/{order_number}', [AdminPendingOrdersController::class, 'FetchOrderCard'])->name('admin.pending_orders.fetch_card');
     Route::post('/admin/pending_orders/checkout', [AdminPendingOrdersController::class, 'CheckoutOrder'])->name('admin.pending_orders.checkout');
 });
 

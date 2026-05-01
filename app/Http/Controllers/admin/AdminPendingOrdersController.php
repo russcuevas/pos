@@ -17,30 +17,68 @@ class AdminPendingOrdersController extends Controller
             ->groupBy('order_number');
 
         $groupedOrders = $orders->map(function ($items, $orderNumber) {
-            $first = $items->first();
-            $orderIds = $items->pluck('id')->toArray();
-            $chats = \App\Models\OrdersChats::whereIn('order_id', $orderIds)
-                ->orderBy('created_at', 'asc')
-                ->get();
-
-            return (object) [
-                'order_number' => $orderNumber,
-                'status' => $first->order_status,
-                'created_at' => $first->created_at,
-                'customer_name' => $first->customer_name,
-                'customer_phone' => $first->customer_phone,
-                'items' => $items,
-                'total_amount' => $items->sum('total_price'),
-                'chats_count' => $chats->count(),
-                'chats' => $chats,
-                'note' => $chats->first()?->message ?? null,
-            ];
+            return $this->formatOrder($items, $orderNumber);
         });
 
         return view('admin.pending_orders.index', [
             'orders' => $groupedOrders,
             'products' => \App\Models\Products::where('is_show', 1)->where('quantity', '>', 0)->get()
         ]);
+    }
+
+    private function formatOrder($items, $orderNumber)
+    {
+        $first = $items->first();
+        $orderIds = $items->pluck('id')->toArray();
+        $chats = \App\Models\OrdersChats::whereIn('order_id', $orderIds)
+            ->orderBy('created_at', 'asc')
+            ->get();
+
+        return (object) [
+            'order_number' => $orderNumber,
+            'status' => $first->order_status,
+            'created_at' => $first->created_at,
+            'customer_name' => $first->customer_name,
+            'customer_phone' => $first->customer_phone,
+            'items' => $items,
+            'total_amount' => $items->sum('total_price'),
+            'chats_count' => $chats->count(),
+            'chats' => $chats,
+            'note' => $chats->first()?->message ?? null,
+        ];
+    }
+
+    public function CheckNewOrders()
+    {
+        $orderNumbers = \App\Models\Orders::whereNotIn('order_status', ['Completed', 'Cancelled'])
+            ->whereNotNull('order_number')
+            ->where('order_number', '!=', '')
+            ->distinct()
+            ->orderBy('created_at', 'desc')
+            ->pluck('order_number');
+
+        return response()->json(['order_numbers' => $orderNumbers]);
+    }
+
+    public function FetchOrderCard($orderNumber = null)
+    {
+        if (!$orderNumber) {
+            return response()->json(['success' => false, 'message' => 'Order number is required']);
+        }
+
+        $items = \App\Models\Orders::where('order_number', $orderNumber)
+            ->with('product')
+            ->get();
+
+        if ($items->isEmpty()) {
+            return response()->json(['success' => false, 'message' => 'Order not found']);
+        }
+
+        $order = $this->formatOrder($items, $orderNumber);
+        
+        $html = view('admin.pending_orders.order_card_partial', ['order' => $order])->render();
+
+        return response()->json(['success' => true, 'html' => $html]);
     }
 
     public function AddOrderItem(Request $request)

@@ -194,7 +194,7 @@ class CustomersCartController extends Controller
                 'payment_amount' => null,
                 'change_amount' => null,
                 'payment_method' => null,
-                'order_type' => 'Walk in',
+                'order_type' => 'Online',
                 'order_status' => 'Pending',
                 'delivery_fee' => null,
                 'cashier_id' => null,

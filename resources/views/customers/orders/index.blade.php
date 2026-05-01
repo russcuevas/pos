@@ -483,14 +483,22 @@
                                         $statusClass = 'status-pending';
                                         $statusLabel = 'Pending Confirmation';
                                         break;
+                                    case 'preparing':
+                                        $statusClass = 'status-preparing';
+                                        $statusLabel = 'Preparing';
+                                        break;
+                                    case 'ready':
                                     case 'ready for pickup':
                                         $statusClass = 'status-ready';
+                                        $statusLabel = 'Ready for pickup';
                                         break;
                                     case 'completed':
                                         $statusClass = 'status-completed';
+                                        $statusLabel = 'Completed';
                                         break;
                                     case 'cancelled':
                                         $statusClass = 'status-cancelled';
+                                        $statusLabel = 'Cancelled';
                                         break;
                                     default:
                                         $statusClass = 'status-pending';
