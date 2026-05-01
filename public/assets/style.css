@@ -3063,3 +3063,44 @@ body.sidebar-mini .sidebar:not(:hover) .nav-link .pending-badge {
     width: auto !important;
     margin-left: 0 !important;
 }
+
+/* --- Mobile Responsive Enhancements --- */
+@media (max-width: 991px) {
+    .main-content {
+        padding: calc(var(--topbar-h) + 16px) 16px 16px;
+    }
+    .topbar {
+        padding: 0 16px;
+    }
+    .user-menu-trigger-name, .user-menu-trigger-role {
+        display: none;
+    }
+    .user-menu-trigger {
+        padding: 4px;
+    }
+}
+
+@media (max-width: 768px) {
+    .page-header h2 {
+        font-size: 1.3rem;
+    }
+    .stat-card {
+        padding: 16px;
+        gap: 12px;
+    }
+    .stat-icon {
+        width: 44px;
+        height: 44px;
+        font-size: 1.2rem;
+    }
+    .stat-body .stat-value {
+        font-size: 1.25rem;
+    }
+    .stat-body .stat-label {
+        font-size: 0.75rem;
+    }
+    .stat-trend {
+        margin-top: 4px;
+        font-size: 0.65rem;
+    }
+}

@@ -33,7 +33,7 @@
 
         <!-- â”€â”€ Stat Cards â”€â”€ -->
         <div class="row g-3 mb-4">
-            <div class="col-6">
+            <div class="col-12 col-sm-6 col-lg-6">
                 <div class="stat-card">
                     <div class="stat-icon cobalt"><i class="bi bi-cart-check"></i></div>
                     <div class="stat-body">
@@ -46,7 +46,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-6">
+            <div class="col-12 col-sm-6 col-lg-6">
                 <div class="stat-card">
                     <div class="stat-icon purple"><i class="bi bi-graph-up-arrow"></i></div>
                     <div class="stat-body">
@@ -59,7 +59,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-6">
+            <div class="col-12 col-sm-6 col-lg-6">
                 <div class="stat-card">
                     <div class="stat-icon green"><i class="bi bi-wallet2"></i></div>
                     <div class="stat-body">
@@ -72,7 +72,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-6">
+            <div class="col-12 col-sm-6 col-lg-6">
                 <div class="stat-card">
                     <div class="stat-icon amber"><i class="bi bi-box-seam"></i></div>
                     <div class="stat-body">

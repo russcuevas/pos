@@ -210,16 +210,17 @@
         .footer-link {
             text-decoration: none;
             color: #0284c7;
-            font-weight: 600;
-            font-size: 0.85rem;
+            font-weight: 700;
+            font-size: 0.78rem;
             display: flex;
             align-items: center;
-            gap: 6px;
-            transition: opacity 0.2s;
+            gap: 4px;
+            transition: all 0.2s;
         }
 
         .footer-link:hover {
             opacity: 0.8;
+            transform: translateY(-1px);
         }
 
         .footer-link-add {
@@ -234,15 +235,52 @@
             background: #0ea5e9;
             color: white;
             border: none;
-            padding: 6px 16px;
-            border-radius: 6px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            transition: background 0.2s;
+            padding: 5px 14px;
+            border-radius: 999px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(14, 165, 233, 0.15);
+            display: flex;
+            align-items: center;
+            gap: 5px;
         }
 
         .btn-start-preparing:hover {
             background: #0284c7;
+        }
+
+        @media (max-width: 576px) {
+            .order-card-footer {
+                flex-direction: column;
+                align-items: stretch !important;
+                gap: 12px !important;
+                padding: 15px !important;
+            }
+
+            .footer-actions-group {
+                display: grid !important;
+                grid-template-columns: 1fr 1fr;
+                gap: 8px !important;
+            }
+
+            .footer-actions-group .btn-start-preparing {
+                grid-column: span 2;
+                order: -1;
+                justify-content: center;
+                padding: 10px !important;
+            }
+
+            .footer-actions-group .footer-link {
+                justify-content: center;
+                padding: 8px !important;
+                background: rgba(0, 0, 0, 0.03);
+                border-radius: 8px;
+            }
+
+            .dark-mode .footer-actions-group .footer-link {
+                background: rgba(255, 255, 255, 0.05);
+            }
         }
 
         /* Chat Interface Styling */
@@ -561,12 +599,13 @@
                                 <a href="javascript:void(0)" class="footer-link btn-toggle-chat"
                                     data-order-number="{{ $order->order_number }}">
                                     <i class="bi bi-chat-dots-fill"></i>
-                                    Chat (<span
-                                        id="chat-count-{{ $order->order_number }}">{{ $order->chats_count }}</span>)
+                                    Chat <span class="badge bg-secondary rounded-pill ms-1"
+                                        style="font-size: 0.6rem; padding: 2px 5px;"
+                                        id="chat-count-{{ $order->order_number }}">{{ $order->chats_count }}</span>
                                 </a>
                             </div>
 
-                            <div class="d-flex align-items-center gap-3">
+                            <div class="footer-actions-group d-flex align-items-center gap-2">
                                 <a href="javascript:void(0)"
                                     class="footer-link footer-link-add btn-open-product-modal"
                                     data-order-number="{{ $order->order_number }}">
@@ -575,27 +614,30 @@
                                 </a>
                                 <a href="javascript:void(0)" class="footer-link footer-link-cancel btn-cancel-order"
                                     data-order-number="{{ $order->order_number }}">
+                                    <i class="bi bi-x-circle-fill"></i>
                                     Cancel
                                 </a>
                                 @if (strtolower($order->status) === 'pending')
                                     <button class="btn-start-preparing btn-action-start"
                                         data-order-number="{{ $order->order_number }}">
+                                        <i class="bi bi-play-fill"></i>
                                         Start Preparing
                                     </button>
                                 @endif
                                 @if (strtolower($order->status) === 'preparing')
-                                    <button class="btn-mark-ready btn-action-ready"
-                                        data-order-number="{{ $order->order_number }}"
-                                        style="background: #10b981; color: white; border: none; padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600;">
+                                    <button class="btn-start-preparing btn-action-ready"
+                                        data-order-number="{{ $order->order_number }}" style="background: #10b981;">
+                                        <i class="bi bi-check-circle-fill"></i>
                                         Mark as Ready
                                     </button>
                                 @endif
                                 @if (strtolower($order->status) === 'ready' || strtolower($order->status) === 'ready for pickup')
-                                    <button class="btn-checkout-order btn-action-checkout"
+                                    <button class="btn-start-preparing btn-action-checkout"
                                         data-order-number="{{ $order->order_number }}"
                                         data-total="{{ $order->total_amount }}"
                                         data-customer-name="{{ $order->customer_name }}"
-                                        style="background: #0284c7; color: white; border: none; padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600;">
+                                        style="background: #0284c7;">
+                                        <i class="bi bi-cart-check-fill"></i>
                                         Checkout
                                     </button>
                                 @endif
@@ -631,7 +673,42 @@
 
     <!-- Product Selection Modal -->
     <div class="modal fade" id="productModal" tabindex="-1" aria-hidden="true">
-        ... (keeping existing content) ...
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title w-100 text-center fw-bold">Add Item to Order</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body px-4 pt-3 pb-4">
+                    <div class="mb-3">
+                        <div class="input-group">
+                            <span class="input-group-text bg-transparent border-end-0">
+                                <i class="bi bi-search text-muted"></i>
+                            </span>
+                            <input type="text" id="modalProductSearch" class="form-control border-start-0" 
+                                placeholder="Search products...">
+                        </div>
+                    </div>
+                    <div class="product-list-container">
+                        @foreach($products as $product)
+                            <div class="product-item modal-product-btn" 
+                                 data-id="{{ $product->id }}" 
+                                 data-name="{{ strtolower($product->product_name) }}">
+                                <img src="{{ $product->product_image ? asset($product->product_image) : 'https://via.placeholder.com/50' }}" 
+                                     class="product-item-img" alt="">
+                                <div class="product-item-info">
+                                    <div class="product-item-name">{{ $product->product_name }}</div>
+                                    <div class="product-item-price">₱{{ number_format($product->selling_price, 2) }} • Stock: {{ $product->quantity }}</div>
+                                </div>
+                                <button class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                                    <i class="bi bi-plus-lg"></i> Add
+                                </button>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Checkout Modal -->
@@ -784,17 +861,45 @@
         let chatPollers = {};
 
         function startChatPolling(orderNumber) {
-            if (chatPollers[orderNumber]) return;
+            // Strict validation: trim and check if truly empty or "undefined"
+            const cleanedId = String(orderNumber).trim();
+            if (!cleanedId || cleanedId === 'undefined' || cleanedId === 'null' || chatPollers[cleanedId]) {
+                return;
+            }
 
-            chatPollers[orderNumber] = setInterval(async () => {
+            chatPollers[cleanedId] = setInterval(async () => {
                 try {
-                    const response = await fetch(`/admin/pending_orders/messages/${orderNumber}`);
+                    // Double check before fetching
+                    if (!cleanedId) {
+                        clearInterval(chatPollers[cleanedId]);
+                        delete chatPollers[cleanedId];
+                        return;
+                    }
+
+                    const response = await fetch(`/admin/pending_orders/messages/${cleanedId}`);
+                    
+                    if (!response.ok) {
+                        if (response.status === 404) {
+                            console.warn(`Order ${cleanedId} not found, stopping poll.`);
+                            clearInterval(chatPollers[cleanedId]);
+                            delete chatPollers[cleanedId];
+                        }
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    
+                    const contentType = response.headers.get("content-type");
+                    if (!contentType || !contentType.includes("application/json")) {
+                        throw new TypeError("Oops, we didn't get JSON!");
+                    }
+
                     const data = await response.json();
                     if (data.success) {
-                        const container = document.getElementById(`messages-container-${orderNumber}`);
-                        const countSpan = document.getElementById(`chat-count-${orderNumber}`);
+                        const container = document.getElementById(`messages-container-${cleanedId}`);
+                        const countSpan = document.getElementById(`chat-count-${cleanedId}`);
 
                         if (countSpan) countSpan.textContent = data.chats.length;
+
+                        if (!container) return; // Guard for removed cards
 
                         const currentCount = container.querySelectorAll('.chat-bubble').length;
                         if (data.chats.length > currentCount) {
@@ -812,7 +917,7 @@
                         }
                     }
                 } catch (e) {
-                    console.error(e);
+                    console.error("Polling error:", e);
                 }
             }, 5000);
         }
@@ -956,11 +1061,10 @@
                     const container = btn.parentElement;
                     btn.remove();
                     const readyBtn = document.createElement('button');
-                    readyBtn.className = 'btn-mark-ready btn-action-ready';
+                    readyBtn.className = 'btn-start-preparing btn-action-ready';
                     readyBtn.dataset.orderNumber = orderNumber;
-                    readyBtn.style =
-                        'background: #10b981; color: white; border: none; padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600;';
-                    readyBtn.textContent = 'Mark as Ready';
+                    readyBtn.style.background = '#10b981';
+                    readyBtn.innerHTML = '<i class="bi bi-check-circle-fill"></i> Mark as Ready';
                     container.appendChild(readyBtn);
 
                     notyf.success(data.message);
@@ -994,15 +1098,14 @@
                     const container = document.querySelector(
                         `#order-card-${orderNumber} .order-card-footer .gap-3:last-child`);
                     const checkoutBtn = document.createElement('button');
-                    checkoutBtn.className = 'btn-checkout-order btn-action-checkout';
+                    checkoutBtn.className = 'btn-start-preparing btn-action-checkout';
                     checkoutBtn.dataset.orderNumber = orderNumber;
                     checkoutBtn.dataset.total = document.getElementById(`order-total-${orderNumber}`)
                         .textContent.replace('₱', '').replace(/,/g, '');
                     checkoutBtn.dataset.customerName = document.querySelector(
                         `#order-card-${orderNumber} .customer-info`).textContent.split('(')[0].trim();
-                    checkoutBtn.style =
-                        'background: #0284c7; color: white; border: none; padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600;';
-                    checkoutBtn.textContent = 'Checkout';
+                    checkoutBtn.style.background = '#0284c7';
+                    checkoutBtn.innerHTML = '<i class="bi bi-cart-check-fill"></i> Checkout';
                     container.appendChild(checkoutBtn);
 
                     notyf.success(data.message);
@@ -1035,7 +1138,9 @@
                 baseCheckoutTotal = total;
                 calculatePendingChange();
 
-                const modal = new bootstrap.Modal(document.getElementById('checkoutModal'));
+                const modalEl = document.getElementById('checkoutModal');
+                let modal = bootstrap.Modal.getInstance(modalEl);
+                if (!modal) modal = new bootstrap.Modal(modalEl);
                 modal.show();
             }
 
@@ -1081,7 +1186,9 @@
             if (e.target.closest('.btn-open-product-modal')) {
                 const btn = e.target.closest('.btn-open-product-modal');
                 currentOrderNumber = btn.dataset.orderNumber;
-                const modal = new bootstrap.Modal(document.getElementById('productModal'));
+                const modalEl = document.getElementById('productModal');
+                let modal = bootstrap.Modal.getInstance(modalEl);
+                if (!modal) modal = new bootstrap.Modal(modalEl);
                 modal.show();
             }
 

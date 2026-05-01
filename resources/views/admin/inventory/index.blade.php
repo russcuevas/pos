@@ -28,7 +28,7 @@
     <main class="main-content">
 
         <div class="row g-3 mb-4">
-            <div class="col-3">
+            <div class="col-12 col-sm-6 col-lg-3">
                 <div class="stat-card">
                     <div class="stat-icon purple"><i class="bi bi-boxes"></i></div>
                     <div class="stat-body">
@@ -37,7 +37,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-3">
+            <div class="col-12 col-sm-6 col-lg-3">
                 <div class="stat-card">
                     <div class="stat-icon green"><i class="bi bi-shield-check"></i></div>
                     <div class="stat-body">
@@ -46,7 +46,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-3">
+            <div class="col-12 col-sm-6 col-lg-3">
                 <div class="stat-card">
                     <div class="stat-icon amber"><i class="bi bi-exclamation-triangle"></i></div>
                     <div class="stat-body">
@@ -55,7 +55,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-3">
+            <div class="col-12 col-sm-6 col-lg-3">
                 <div class="stat-card">
                     <div class="stat-icon cobalt"><i class="bi bi-exclamation-octagon-fill"></i></div>
                     <div class="stat-body">
