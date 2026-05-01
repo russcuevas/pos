@@ -491,7 +491,7 @@
                                         $statusClass = 'status-pending';
                                 }
                             @endphp
-                            <div class="status-badge {{ $statusClass }}">
+                            <div class="status-badge {{ $statusClass }}" id="status-badge-{{ $order->order_number }}">
                                 {{ $statusLabel }}
                             </div>
 
@@ -577,7 +577,8 @@
 
                             @if (strtolower($order->status) === 'pending')
                                 <a href="javascript:void(0)" class="footer-link footer-link-add btn-open-product-modal"
-                                    data-order-number="{{ $order->order_number }}">
+                                    data-order-number="{{ $order->order_number }}"
+                                    id="btn-add-{{ $order->order_number }}">
                                     <i class="bi bi-plus-circle-fill"></i>
                                     Add
                                 </a>
@@ -598,12 +599,19 @@
                                     </div>
                                 @endforeach
                             </div>
-                            <div class="chat-input-group">
-                                <input type="text" class="chat-input" placeholder="Type a message..."
-                                    id="input-{{ $order->order_number }}">
-                                <button class="btn-send-chat"
-                                    data-order-number="{{ $order->order_number }}">Send</button>
-                            </div>
+                            @if (strtolower($order->status) !== 'completed')
+                                <div class="chat-input-group" id="chat-input-group-{{ $order->order_number }}">
+                                    <input type="text" class="chat-input" placeholder="Type a message..."
+                                        id="input-{{ $order->order_number }}">
+                                    <button class="btn-send-chat"
+                                        data-order-number="{{ $order->order_number }}">Send</button>
+                                </div>
+                            @else
+                                <div class="text-center text-muted small py-2"
+                                    id="chat-disabled-{{ $order->order_number }}">
+                                    Chat is disabled for completed orders.
+                                </div>
+                            @endif
                         </div>
                     </div>
                 @endforeach
@@ -1029,6 +1037,97 @@
                 btn.style.display = name.includes(query) ? 'flex' : 'none';
             });
         });
+
+        // Status Polling
+        function startStatusPolling() {
+            setInterval(async () => {
+                try {
+                    const response = await fetch("{{ route('customers.orders.get_status') }}");
+                    const data = await response.json();
+                    if (data.success) {
+                        Object.entries(data.statuses).forEach(([orderNumber, status]) => {
+                            const badge = document.getElementById(`status-badge-${orderNumber}`);
+                            if (badge) {
+                                const currentStatus = badge.textContent.trim().toLowerCase();
+                                const newStatus = status.toLowerCase();
+
+                                if (currentStatus !== newStatus && !(currentStatus ===
+                                        'pending confirmation' && newStatus === 'pending')) {
+                                    // Update Badge
+                                    let statusClass = 'status-pending';
+                                    let statusLabel = status;
+
+                                    switch (newStatus) {
+                                        case 'pending':
+                                            statusClass = 'status-pending';
+                                            statusLabel = 'Pending Confirmation';
+                                            break;
+                                        case 'preparing':
+                                            statusClass = 'status-preparing';
+                                            statusLabel = 'Preparing';
+                                            break;
+                                        case 'ready':
+                                        case 'ready for pickup':
+                                            statusClass = 'status-ready';
+                                            statusLabel = 'Ready for pickup';
+                                            break;
+                                        case 'completed':
+                                            statusClass = 'status-completed';
+                                            statusLabel = 'Completed';
+                                            break;
+                                        case 'cancelled':
+                                            statusClass = 'status-cancelled';
+                                            statusLabel = 'Cancelled';
+                                            break;
+                                    }
+
+                                    badge.className = `status-badge ${statusClass}`;
+                                    badge.textContent = statusLabel;
+
+                                    // Handle UI changes based on status
+                                    if (newStatus !== 'pending') {
+                                        // Hide "Add" button
+                                        const addBtn = document.getElementById(
+                                        `btn-add-${orderNumber}`);
+                                        if (addBtn) addBtn.style.display = 'none';
+
+                                        // Convert quantity buttons to static text
+                                        document.querySelectorAll(
+                                            `#items-list-${orderNumber} .item-qty-wrap`).forEach(
+                                            wrap => {
+                                                const qty = wrap.querySelector('span').textContent;
+                                                const staticDiv = document.createElement('div');
+                                                staticDiv.className =
+                                                    'd-flex align-items-center gap-2';
+                                                staticDiv.innerHTML =
+                                                    `<span class="text-muted fw-bold" style="font-size: 0.85rem;">${qty}x</span>`;
+                                                wrap.replaceWith(staticDiv);
+                                            });
+                                    }
+
+                                    if (newStatus === 'completed') {
+                                        const chatInput = document.getElementById(
+                                            `chat-input-group-${orderNumber}`);
+                                        if (chatInput) {
+                                            const disabledMsg = document.createElement('div');
+                                            disabledMsg.id = `chat-disabled-${orderNumber}`;
+                                            disabledMsg.className = 'text-center text-muted small py-2';
+                                            disabledMsg.textContent =
+                                                'Chat is disabled for completed orders.';
+                                            chatInput.replaceWith(disabledMsg);
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                    }
+                } catch (e) {
+                    console.error('Status polling error:', e);
+                }
+            }, 10000); // Poll every 10 seconds
+        }
+
+        startStatusPolling();
 
         // Allow 'Enter' key to send message
         document.addEventListener('keypress', (e) => {

@@ -113,7 +113,7 @@
             registrationForm.addEventListener('submit', function() {
                 // Show loading overlay
                 loadingOverlay.style.display = 'flex';
-                
+
                 // Disable button and change text
                 submitBtn.disabled = true;
                 submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Processing...';

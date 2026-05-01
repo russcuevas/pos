@@ -3047,3 +3047,19 @@ body.dark-mode .stock-card {
     background: rgba(30, 41, 59, 0.5);
 }
 
+
+/* Sidebar Badge Mini Logic */
+.sidebar .nav-link .pending-badge {
+    transition: all var(--speed);
+}
+
+body.sidebar-mini .sidebar:not(:hover) .nav-link .pending-badge {
+    position: absolute;
+    top: 6px;
+    right: 12px;
+    font-size: 0.6rem;
+    padding: 2px 5px;
+    opacity: 1 !important;
+    width: auto !important;
+    margin-left: 0 !important;
+}

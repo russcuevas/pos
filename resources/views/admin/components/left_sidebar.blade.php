@@ -49,10 +49,18 @@
                 <i class="bi bi-boxes nav-icon"></i>
                 <span>Inventory</span>
             </a>
+            @php
+                $pendingOrdersCount = \App\Models\Orders::whereIn('order_status', ['Pending', 'Preparing', 'Ready'])
+                    ->distinct('order_number')
+                    ->count('order_number');
+            @endphp
             <a class="nav-link {{ request()->is('admin/pending_orders*') ? 'active' : '' }}"
                 href="{{ url('/admin/pending_orders') }}">
                 <i class="bi bi-hourglass-split nav-icon"></i>
                 <span>Pending Orders</span>
+                @if ($pendingOrdersCount > 0)
+                    <span class="badge bg-info rounded-pill ms-auto pending-badge">{{ $pendingOrdersCount }}</span>
+                @endif
             </a>
             <a class="nav-link {{ request()->is('admin/finance*') ? 'active' : '' }}"
                 href="{{ url('/admin/finance') }}">

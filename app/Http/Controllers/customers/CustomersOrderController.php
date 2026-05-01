@@ -212,6 +212,10 @@ class CustomersOrderController extends Controller
             return response()->json(['success' => false, 'message' => 'Order not found.']);
         }
 
+        if (strtolower($order->order_status) === 'completed') {
+            return response()->json(['success' => false, 'message' => 'Chat is disabled for completed orders.']);
+        }
+
         $chat = OrdersChats::create([
             'order_id' => $order->id,
             'customer_id' => $customerId,
@@ -251,5 +255,19 @@ class CustomersOrderController extends Controller
             });
 
         return response()->json(['success' => true, 'chats' => $chats]);
+    }
+
+    public function GetOrdersStatus()
+    {
+        $customerId = Auth::guard('web')->id();
+        $orders = Orders::where('customer_id', $customerId)
+            ->select('order_number', 'order_status')
+            ->get()
+            ->groupBy('order_number')
+            ->map(function ($items) {
+                return $items->first()->order_status;
+            });
+
+        return response()->json(['success' => true, 'statuses' => $orders]);
     }
 }

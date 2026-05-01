@@ -77,6 +77,14 @@ Route::middleware(['admin'])->group(function () {
 
     // ADMIN PENDING ORDERS
     Route::get('/admin/pending_orders', [AdminPendingOrdersController::class, 'AdminPendingOrdersPage'])->name('admin.pending_orders.page');
+    Route::post('/admin/pending_orders/update-quantity', [AdminPendingOrdersController::class, 'UpdateOrderQuantity'])->name('admin.pending_orders.update_qty');
+    Route::post('/admin/pending_orders/add-item', [AdminPendingOrdersController::class, 'AddOrderItem'])->name('admin.pending_orders.add_item');
+    Route::post('/admin/pending_orders/send-chat', [AdminPendingOrdersController::class, 'SendChat'])->name('admin.pending_orders.send_chat');
+    Route::get('/admin/pending_orders/messages/{order_number}', [AdminPendingOrdersController::class, 'GetMessages'])->name('admin.pending_orders.get_messages');
+    Route::post('/admin/pending_orders/cancel', [AdminPendingOrdersController::class, 'CancelOrder'])->name('admin.pending_orders.cancel');
+    Route::post('/admin/pending_orders/start-preparing', [AdminPendingOrdersController::class, 'StartPreparing'])->name('admin.pending_orders.start_preparing');
+    Route::post('/admin/pending_orders/mark-ready', [AdminPendingOrdersController::class, 'MarkAsReady'])->name('admin.pending_orders.mark_ready');
+    Route::post('/admin/pending_orders/checkout', [AdminPendingOrdersController::class, 'CheckoutOrder'])->name('admin.pending_orders.checkout');
 });
 
 
@@ -97,4 +105,5 @@ Route::middleware(['customer'])->group(function () {
     Route::post('customers/orders/send-chat', [CustomersOrderController::class, 'SendChat'])->name('customers.orders.send_chat');
     Route::get('customers/orders/messages/{order_number}', [CustomersOrderController::class, 'GetMessages'])->name('customers.orders.get_messages');
     Route::post('customers/orders/add-item', [CustomersOrderController::class, 'AddOrderItem'])->name('customers.orders.add_item');
+    Route::get('customers/orders/status', [CustomersOrderController::class, 'GetOrdersStatus'])->name('customers.orders.get_status');
 });
