@@ -685,20 +685,20 @@
                             <span class="input-group-text bg-transparent border-end-0">
                                 <i class="bi bi-search text-muted"></i>
                             </span>
-                            <input type="text" id="modalProductSearch" class="form-control border-start-0" 
+                            <input type="text" id="modalProductSearch" class="form-control border-start-0"
                                 placeholder="Search products...">
                         </div>
                     </div>
                     <div class="product-list-container">
-                        @foreach($products as $product)
-                            <div class="product-item modal-product-btn" 
-                                 data-id="{{ $product->id }}" 
-                                 data-name="{{ strtolower($product->product_name) }}">
-                                <img src="{{ $product->product_image ? asset($product->product_image) : 'https://via.placeholder.com/50' }}" 
-                                     class="product-item-img" alt="">
+                        @foreach ($products as $product)
+                            <div class="product-item modal-product-btn" data-id="{{ $product->id }}"
+                                data-name="{{ strtolower($product->product_name) }}">
+                                <img src="{{ $product->product_image ? asset($product->product_image) : 'https://via.placeholder.com/50' }}"
+                                    class="product-item-img" alt="">
                                 <div class="product-item-info">
                                     <div class="product-item-name">{{ $product->product_name }}</div>
-                                    <div class="product-item-price">₱{{ number_format($product->selling_price, 2) }} • Stock: {{ $product->quantity }}</div>
+                                    <div class="product-item-price">₱{{ number_format($product->selling_price, 2) }} •
+                                        Stock: {{ $product->quantity }}</div>
                                 </div>
                                 <button class="btn btn-sm btn-outline-primary rounded-pill px-3">
                                     <i class="bi bi-plus-lg"></i> Add
@@ -712,21 +712,21 @@
     </div>
 
     <!-- Checkout Modal -->
-    <div class="modal fade" id="checkoutModal" tabindex="-1" aria-hidden="true">
+    <div class="modal fade" id="checkoutModal" tabindex="-1" aria-labelledby="checkoutModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" style="max-width: 400px;">
-            <div class="modal-content border-0 shadow">
+            <div class="modal-content" style="border-radius: 12px; border: none; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
                 <div class="modal-header border-0 pb-0">
-                    <h5 class="modal-title w-100 text-center fw-bold">Checkout</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <h5 class="modal-title w-100 text-center fw-bold" id="checkoutModalLabel">Checkout</h5>
+                    <button type="button" class="btn-close d-none" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body px-4 pt-3 pb-4">
                     <form id="pendingCheckoutForm">
                         <input type="hidden" id="checkoutOrderNumber">
 
-                        <!-- Customer Info (Read Only) -->
+                        <!-- Customer Details -->
                         <div class="mb-3 text-center">
-                            <div class="fw-bold text-muted small mb-1">CUSTOMER</div>
-                            <div id="checkoutCustomerName" class="fw-bold"></div>
+                            <div class="fw-bold text-muted small mb-1" style="letter-spacing: 1px;">CUSTOMER NAME</div>
+                            <input type="text" id="checkoutCustomerName" class="form-control text-center fw-bold bg-light border-0" readonly style="font-size: 1.1rem; color: var(--text-primary);">
                         </div>
 
                         <!-- Discount -->
@@ -743,7 +743,7 @@
 
                         <!-- Total -->
                         <div class="text-center mb-4">
-                            <div style="color: var(--text-secondary); font-size: 0.9em;">Total Amount Due</div>
+                            <div style="color: #64748b; font-size: 0.9em;">Total Amount Due</div>
                             <div class="d-flex flex-column align-items-center justify-content-center mt-1">
                                 <span id="originalTotalDisplay" class="text-muted text-decoration-line-through d-none"
                                     style="font-size: 1.1rem; margin-bottom: -5px;"></span>
@@ -768,11 +768,11 @@
 
                         <!-- Enter Payment Amount -->
                         <div class="mb-3">
-                            <label class="form-label" style="font-size: 0.85em; color: var(--text-secondary);">Enter
+                            <label class="form-label" style="font-size: 0.85em; color: #64748b;">Enter
                                 Payment Amount</label>
                             <input type="number" id="paymentAmountInput"
-                                class="form-control text-center fs-4 fw-bold mb-2" required min="0"
-                                step="0.01" style="height: 60px;">
+                                class="form-control text-center fs-4 fw-bold mb-2 shadow-sm" required min="0"
+                                step="0.01" style="height: 60px; border-radius: 10px;">
 
                             <div class="d-flex justify-content-between gap-1 mt-2">
                                 <button type="button"
@@ -800,8 +800,8 @@
                         </div>
 
                         <!-- Submit -->
-                        <button type="submit" class="btn w-100 py-3 fw-bold"
-                            style="background-color: #198754; color: #fff; border-radius: 8px;">Confirm
+                        <button type="submit" class="btn w-100 py-3 fw-bold shadow-sm"
+                            style="background-color: #10b981; color: #fff; border-radius: 10px; font-size: 1.1rem;">Confirm
                             Payment</button>
                     </form>
                 </div>
@@ -876,8 +876,9 @@
                         return;
                     }
 
-                    const response = await fetch(`/admin/pending_orders/messages/${cleanedId}`);
-                    
+                    const response = await fetch(
+                        `/admin/pending_orders/messages/${encodeURIComponent(cleanedId)}`);
+
                     if (!response.ok) {
                         if (response.status === 404) {
                             console.warn(`Order ${cleanedId} not found, stopping poll.`);
@@ -886,7 +887,7 @@
                         }
                         throw new Error(`HTTP error! status: ${response.status}`);
                     }
-                    
+
                     const contentType = response.headers.get("content-type");
                     if (!contentType || !contentType.includes("application/json")) {
                         throw new TypeError("Oops, we didn't get JSON!");
@@ -919,7 +920,7 @@
                 } catch (e) {
                     console.error("Polling error:", e);
                 }
-            }, 5000);
+            }, 2000);
         }
 
         document.addEventListener('click', async (e) => {
@@ -931,8 +932,6 @@
 
                 if (chatSection.style.display === 'block') {
                     chatSection.style.display = 'none';
-                    clearInterval(chatPollers[orderNumber]);
-                    delete chatPollers[orderNumber];
                 } else {
                     chatSection.style.display = 'block';
                     const container = chatSection.querySelector('.chat-messages-container');
@@ -1095,8 +1094,8 @@
                     btn.remove();
 
                     // Add Checkout Button
-                    const container = document.querySelector(
-                        `#order-card-${orderNumber} .order-card-footer .gap-3:last-child`);
+                    const footerGroup = document.querySelector(
+                        `#order-card-${orderNumber} .footer-actions-group`);
                     const checkoutBtn = document.createElement('button');
                     checkoutBtn.className = 'btn-start-preparing btn-action-checkout';
                     checkoutBtn.dataset.orderNumber = orderNumber;
@@ -1106,7 +1105,7 @@
                         `#order-card-${orderNumber} .customer-info`).textContent.split('(')[0].trim();
                     checkoutBtn.style.background = '#0284c7';
                     checkoutBtn.innerHTML = '<i class="bi bi-cart-check-fill"></i> Checkout';
-                    container.appendChild(checkoutBtn);
+                    footerGroup.appendChild(checkoutBtn);
 
                     notyf.success(data.message);
                 }
@@ -1120,7 +1119,7 @@
                 const customerName = btn.dataset.customerName;
 
                 document.getElementById('checkoutOrderNumber').value = orderNumber;
-                document.getElementById('checkoutCustomerName').textContent = customerName;
+                document.getElementById('checkoutCustomerName').value = customerName;
                 document.getElementById('checkoutTotalDisplay').textContent = '₱' + total.toLocaleString(
                     undefined, {
                         minimumFractionDigits: 2
@@ -1342,6 +1341,12 @@
                 const name = btn.dataset.name;
                 btn.style.display = name.includes(term) ? 'flex' : 'none';
             });
+        });
+
+        // Start polling for all pending orders on page load
+        document.querySelectorAll('.btn-toggle-chat').forEach(btn => {
+            const orderNumber = btn.dataset.orderNumber;
+            if (orderNumber) startChatPolling(orderNumber);
         });
     </script>
 </body>

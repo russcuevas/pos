@@ -732,11 +732,15 @@
         let chatPollers = {};
 
         function startChatPolling(orderNumber) {
-            if (chatPollers[orderNumber]) return;
+            if (!orderNumber || chatPollers[orderNumber]) return;
 
             chatPollers[orderNumber] = setInterval(async () => {
                 try {
-                    const response = await fetch(`/customers/orders/messages/${orderNumber}`);
+                    const response = await fetch(
+                        `/customers/orders/messages/${encodeURIComponent(orderNumber)}`);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
                     const data = await response.json();
                     if (data.success) {
                         const container = document.getElementById(`messages-container-${orderNumber}`);
@@ -765,7 +769,7 @@
                 } catch (e) {
                     console.error('Polling error:', e);
                 }
-            }, 5000); // Poll every 5 seconds
+            }, 3000); // Poll every 5 seconds
         }
 
         document.addEventListener('click', async (e) => {
@@ -777,15 +781,9 @@
 
                 if (chatSection.style.display === 'block') {
                     chatSection.style.display = 'none';
-                    clearInterval(chatPollers[orderNumber]);
-                    delete chatPollers[orderNumber];
                 } else {
                     document.querySelectorAll('.chat-section').forEach(s => {
                         s.style.display = 'none';
-                        // Stop other pollers
-                        const otherNum = s.id.replace('chat-', '');
-                        clearInterval(chatPollers[otherNum]);
-                        delete chatPollers[otherNum];
                     });
                     chatSection.style.display = 'block';
                     const container = chatSection.querySelector('.chat-messages-container');
@@ -1043,6 +1041,9 @@
             setInterval(async () => {
                 try {
                     const response = await fetch("{{ route('customers.orders.get_status') }}");
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
                     const data = await response.json();
                     if (data.success) {
                         Object.entries(data.statuses).forEach(([orderNumber, status]) => {
@@ -1088,7 +1089,7 @@
                                     if (newStatus !== 'pending') {
                                         // Hide "Add" button
                                         const addBtn = document.getElementById(
-                                        `btn-add-${orderNumber}`);
+                                            `btn-add-${orderNumber}`);
                                         if (addBtn) addBtn.style.display = 'none';
 
                                         // Convert quantity buttons to static text
@@ -1128,6 +1129,12 @@
         }
 
         startStatusPolling();
+
+        // Start polling for all orders on page load
+        document.querySelectorAll('.btn-toggle-chat').forEach(btn => {
+            const orderNumber = btn.dataset.orderNumber;
+            if (orderNumber) startChatPolling(orderNumber);
+        });
 
         // Allow 'Enter' key to send message
         document.addEventListener('keypress', (e) => {
