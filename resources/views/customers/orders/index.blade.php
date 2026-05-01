@@ -470,8 +470,15 @@
                                 <div class="order-number">Order {{ $order->order_number }}</div>
                                 <div class="order-date">{{ $order->created_at->format('n/j/Y, g:i:s A') }}</div>
                             </div>
-                            <div class="order-total" id="order-total-{{ $order->order_number }}">
-                                ₱{{ number_format($order->total_amount, 2) }}</div>
+                            <div class="text-end">
+                                <div class="order-total" id="order-total-{{ $order->order_number }}">
+                                    ₱{{ number_format($order->total_amount, 2) }}</div>
+                                @if (strtolower($order->status) === 'completed' && $order->discount > 0)
+                                    <div class="text-danger small fw-bold">
+                                        -₱{{ number_format($order->discount, 2) }} Discount
+                                    </div>
+                                @endif
+                            </div>
                         </div>
 
                         <div class="order-card-body">
@@ -612,7 +619,7 @@
                                     </div>
                                 @endforeach
                             </div>
-                            @if (strtolower($order->status) !== 'completed')
+                            @if (!in_array(strtolower($order->status), ['completed', 'cancelled']))
                                 <div class="chat-input-group" id="chat-input-group-{{ $order->order_number }}">
                                     <input type="text" class="chat-input" placeholder="Type a message..."
                                         id="input-{{ $order->order_number }}">
@@ -622,7 +629,7 @@
                             @else
                                 <div class="text-center text-muted small py-2"
                                     id="chat-disabled-{{ $order->order_number }}">
-                                    Chat is disabled for completed orders.
+                                    Chat is disabled for completed/cancelled orders.
                                 </div>
                             @endif
                         </div>
@@ -749,6 +756,14 @@
 
             chatPollers[orderNumber] = setInterval(async () => {
                 try {
+                    // STOP polling if the chat window is closed
+                    const chatSection = document.getElementById(`chat-${orderNumber}`);
+                    if (!chatSection || chatSection.style.display !== 'block') {
+                        clearInterval(chatPollers[orderNumber]);
+                        delete chatPollers[orderNumber];
+                        return;
+                    }
+
                     const response = await fetch(
                         `/customers/orders/messages/${encodeURIComponent(orderNumber)}`);
                     if (!response.ok) {
@@ -1059,6 +1074,15 @@
                     }
                     const data = await response.json();
                     if (data.success) {
+                        // Update Chat Counts Globally
+                        if (data.chat_counts) {
+                            Object.entries(data.chat_counts).forEach(([orderNum, count]) => {
+                                const countSpan = document.getElementById(`chat-count-${orderNum}`);
+                                if (countSpan) countSpan.textContent = count;
+                            });
+                        }
+
+                        // Update Statuses
                         Object.entries(data.statuses).forEach(([orderNumber, status]) => {
                             const badge = document.getElementById(`status-badge-${orderNumber}`);
                             if (badge) {
@@ -1119,7 +1143,7 @@
                                             });
                                     }
 
-                                    if (newStatus === 'completed') {
+                                    if (newStatus === 'completed' || newStatus === 'cancelled') {
                                         const chatInput = document.getElementById(
                                             `chat-input-group-${orderNumber}`);
                                         if (chatInput) {
@@ -1127,7 +1151,7 @@
                                             disabledMsg.id = `chat-disabled-${orderNumber}`;
                                             disabledMsg.className = 'text-center text-muted small py-2';
                                             disabledMsg.textContent =
-                                                'Chat is disabled for completed orders.';
+                                                'Chat is disabled for completed/cancelled orders.';
                                             chatInput.replaceWith(disabledMsg);
                                         }
                                     }
@@ -1142,12 +1166,6 @@
         }
 
         startStatusPolling();
-
-        // Start polling for all orders on page load
-        document.querySelectorAll('.btn-toggle-chat').forEach(btn => {
-            const orderNumber = btn.dataset.orderNumber;
-            if (orderNumber) startChatPolling(orderNumber);
-        });
 
         // Allow 'Enter' key to send message
         document.addEventListener('keypress', (e) => {

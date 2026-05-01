@@ -57,7 +57,17 @@ class AdminPendingOrdersController extends Controller
             ->orderBy('created_at', 'desc')
             ->pluck('order_number');
 
-        return response()->json(['order_numbers' => $orderNumbers]);
+        // Optimized way to get all chat counts in one query
+        $chatCounts = \App\Models\OrdersChats::join('orders', 'orders_chats.order_id', '=', 'orders.id')
+            ->whereIn('orders.order_number', $orderNumbers)
+            ->select('orders.order_number', \Illuminate\Support\Facades\DB::raw('count(*) as total'))
+            ->groupBy('orders.order_number')
+            ->pluck('total', 'orders.order_number');
+
+        return response()->json([
+            'order_numbers' => $orderNumbers,
+            'chat_counts' => (object)$chatCounts
+        ]);
     }
 
     public function FetchOrderCard($orderNumber = null)
@@ -75,7 +85,7 @@ class AdminPendingOrdersController extends Controller
         }
 
         $order = $this->formatOrder($items, $orderNumber);
-        
+
         $html = view('admin.pending_orders.order_card_partial', ['order' => $order])->render();
 
         return response()->json(['success' => true, 'html' => $html]);
@@ -268,7 +278,7 @@ class AdminPendingOrdersController extends Controller
         $orderNumber = $request->input('order_number');
         \App\Models\Orders::where('order_number', $orderNumber)
             ->update(['order_status' => 'Cancelled']);
-        
+
         return response()->json(['success' => true, 'message' => 'Order cancelled successfully.']);
     }
 
@@ -277,7 +287,7 @@ class AdminPendingOrdersController extends Controller
         $orderNumber = $request->input('order_number');
         \App\Models\Orders::where('order_number', $orderNumber)
             ->update(['order_status' => 'Preparing']);
-        
+
         return response()->json(['success' => true, 'message' => 'Order preparation started.']);
     }
 
@@ -286,7 +296,7 @@ class AdminPendingOrdersController extends Controller
         $orderNumber = $request->input('order_number');
         \App\Models\Orders::where('order_number', $orderNumber)
             ->update(['order_status' => 'Ready']);
-        
+
         return response()->json(['success' => true, 'message' => 'Order marked as ready.']);
     }
 

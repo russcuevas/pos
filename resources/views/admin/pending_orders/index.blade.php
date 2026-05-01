@@ -689,7 +689,6 @@
         let chatPollers = {};
 
         function startChatPolling(orderNumber) {
-            // Strict validation: trim and check if truly empty or "undefined"
             const cleanedId = String(orderNumber).trim();
             if (!cleanedId || cleanedId === 'undefined' || cleanedId === 'null' || chatPollers[cleanedId]) {
                 return;
@@ -697,8 +696,9 @@
 
             chatPollers[cleanedId] = setInterval(async () => {
                 try {
-                    // Double check before fetching
-                    if (!cleanedId) {
+                    // STOP polling if the chat window is closed
+                    const chatSection = document.getElementById(`chat-${cleanedId}`);
+                    if (!chatSection || chatSection.style.display !== 'block') {
                         clearInterval(chatPollers[cleanedId]);
                         delete chatPollers[cleanedId];
                         return;
@@ -1179,12 +1179,6 @@
             });
         });
 
-        // Start polling for all pending orders on page load
-        document.querySelectorAll('.btn-toggle-chat').forEach(btn => {
-            const orderNumber = btn.dataset.orderNumber;
-            if (orderNumber) startChatPolling(orderNumber);
-        });
-
         // --- REAL-TIME ORDER POLLING ---
         async function checkNewOrders() {
             try {
@@ -1199,6 +1193,14 @@
                 const data = await response.json();
 
                 if (data.order_numbers) {
+                    // Update Chat Counts for all existing cards
+                    if (data.chat_counts) {
+                        Object.entries(data.chat_counts).forEach(([orderNum, count]) => {
+                            const badge = document.getElementById(`chat-count-${orderNum}`);
+                            if (badge) badge.textContent = count;
+                        });
+                    }
+
                     const currentOrderNumbers = Array.from(document.querySelectorAll('.order-card'))
                         .map(card => card.id.replace('order-card-', ''))
                         .filter(num => num && num !== '');

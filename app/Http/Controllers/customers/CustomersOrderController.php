@@ -29,12 +29,18 @@ class CustomersOrderController extends Controller
                 ->orderBy('created_at', 'asc')
                 ->get();
 
+            $status = strtolower($first->order_status);
+            // If completed, the admin saves the final total in total_price of each row.
+            // If not, it's the sum of line totals.
+            $totalAmount = ($status === 'completed') ? $first->total_price : $items->sum('total_price');
+
             return (object) [
                 'order_number' => $orderNumber,
                 'status' => $first->order_status,
                 'created_at' => $first->created_at,
                 'items' => $items,
-                'total_amount' => $items->sum('total_price'),
+                'total_amount' => $totalAmount,
+                'discount' => $first->discount_price ?? 0,
                 'chats_count' => $chats->count(),
                 'chats' => $chats,
                 'note' => $chats->first()?->message ?? null,
@@ -212,8 +218,8 @@ class CustomersOrderController extends Controller
             return response()->json(['success' => false, 'message' => 'Order not found.']);
         }
 
-        if (strtolower($order->order_status) === 'completed') {
-            return response()->json(['success' => false, 'message' => 'Chat is disabled for completed orders.']);
+        if (in_array(strtolower($order->order_status), ['completed', 'cancelled'])) {
+            return response()->json(['success' => false, 'message' => 'Chat is disabled for completed/cancelled orders.']);
         }
 
         $chat = OrdersChats::create([
@@ -260,14 +266,30 @@ class CustomersOrderController extends Controller
     public function GetOrdersStatus()
     {
         $customerId = Auth::guard('web')->id();
+        
+        // Get statuses
         $orders = Orders::where('customer_id', $customerId)
             ->select('order_number', 'order_status')
             ->get()
-            ->groupBy('order_number')
-            ->map(function ($items) {
-                return $items->first()->order_status;
-            });
+            ->groupBy('order_number');
+            
+        $statuses = $orders->map(function ($items) {
+            return $items->first()->order_status;
+        });
 
-        return response()->json(['success' => true, 'statuses' => $orders]);
+        // Get chat counts for these orders
+        $orderNumbers = $orders->keys();
+        $chatCounts = OrdersChats::join('orders', 'orders_chats.order_id', '=', 'orders.id')
+            ->whereIn('orders.order_number', $orderNumbers)
+            ->where('orders.customer_id', $customerId)
+            ->select('orders.order_number', \DB::raw('count(*) as total'))
+            ->groupBy('orders.order_number')
+            ->pluck('total', 'orders.order_number');
+
+        return response()->json([
+            'success' => true, 
+            'statuses' => $statuses,
+            'chat_counts' => $chatCounts
+        ]);
     }
 }
