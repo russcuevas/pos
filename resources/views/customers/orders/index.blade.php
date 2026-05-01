@@ -86,6 +86,11 @@
             color: #d97706;
         }
 
+        .status-preparing {
+            /* background: #dcfce7;
+            color: #16a34a; */
+        }
+
         .status-ready {
             background: #dcfce7;
             color: #16a34a;
@@ -769,7 +774,7 @@
                 } catch (e) {
                     console.error('Polling error:', e);
                 }
-            }, 3000); // Poll every 5 seconds
+            }, 2000); // Poll every 5 seconds
         }
 
         document.addEventListener('click', async (e) => {

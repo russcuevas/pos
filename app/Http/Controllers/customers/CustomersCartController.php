@@ -161,8 +161,8 @@ class CustomersCartController extends Controller
             return response()->json(['success' => false, 'message' => 'Your cart is empty.']);
         }
 
-        $latestOrder = Orders::latest('id')->first();
-        $orId = $latestOrder ? $latestOrder->id + 1 : 1;
+        $maxOrderNum = Orders::selectRaw('MAX(CAST(REPLACE(order_number, "#OR", "") AS UNSIGNED)) as max_num')->value('max_num');
+        $orId = $maxOrderNum ? $maxOrderNum + 1 : 1;
         $orderNumber = '#OR' . $orId;
 
         $firstOrderEntryId = null;

@@ -154,8 +154,8 @@ class AdminPOSController extends Controller
 
         $change_amount = $payment_amount - $total_price;
 
-        $latestOrder = Orders::latest('id')->first();
-        $orId = $latestOrder ? $latestOrder->id + 1 : 1;
+        $maxOrderNum = Orders::selectRaw('MAX(CAST(REPLACE(order_number, "#OR", "") AS UNSIGNED)) as max_num')->value('max_num');
+        $orId = $maxOrderNum ? $maxOrderNum + 1 : 1;
         $order_number = '#OR' . $orId;
 
         foreach ($cartItems as $item) {

@@ -490,7 +490,7 @@
                     <div class="order-card" id="order-card-{{ $order->order_number }}">
                         <div class="order-card-header">
                             <div>
-                                <div class="order-number">Order #{{ $order->order_number }}</div>
+                                <div class="order-number">Order {{ $order->order_number }}</div>
                                 <div class="order-date">{{ $order->created_at->format('n/j/Y, g:i:s A') }}</div>
                                 <div class="customer-info">
                                     {{ $order->customer_name }} (<span
@@ -712,12 +712,15 @@
     </div>
 
     <!-- Checkout Modal -->
-    <div class="modal fade" id="checkoutModal" tabindex="-1" aria-labelledby="checkoutModalLabel" aria-hidden="true">
+    <div class="modal fade" id="checkoutModal" tabindex="-1" aria-labelledby="checkoutModalLabel"
+        aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" style="max-width: 400px;">
-            <div class="modal-content" style="border-radius: 12px; border: none; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
+            <div class="modal-content"
+                style="border-radius: 12px; border: none; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
                 <div class="modal-header border-0 pb-0">
                     <h5 class="modal-title w-100 text-center fw-bold" id="checkoutModalLabel">Checkout</h5>
-                    <button type="button" class="btn-close d-none" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close d-none" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
                 </div>
                 <div class="modal-body px-4 pt-3 pb-4">
                     <form id="pendingCheckoutForm">
@@ -725,8 +728,11 @@
 
                         <!-- Customer Details -->
                         <div class="mb-3 text-center">
-                            <div class="fw-bold text-muted small mb-1" style="letter-spacing: 1px;">CUSTOMER NAME</div>
-                            <input type="text" id="checkoutCustomerName" class="form-control text-center fw-bold bg-light border-0" readonly style="font-size: 1.1rem; color: var(--text-primary);">
+                            <div class="fw-bold text-muted small mb-1" style="letter-spacing: 1px;">CUSTOMER NAME
+                            </div>
+                            <input type="text" id="checkoutCustomerName"
+                                class="form-control text-center fw-bold bg-light border-0" readonly
+                                style="font-size: 1.1rem; color: var(--text-primary);">
                         </div>
 
                         <!-- Discount -->
@@ -1089,20 +1095,25 @@
                 const data = await response.json();
                 if (data.success) {
                     const badge = document.getElementById(`status-badge-${orderNumber}`);
-                    badge.className = 'status-badge status-ready';
-                    badge.textContent = 'Ready for pickup';
+                    if (badge) {
+                        badge.className = 'status-badge status-ready';
+                        badge.textContent = 'Ready for pickup';
+                    }
+
+                    // Get container and card
+                    const footerGroup = btn.parentElement;
+                    const card = document.getElementById(`order-card-${orderNumber}`);
+                    
                     btn.remove();
 
                     // Add Checkout Button
-                    const footerGroup = document.querySelector(
-                        `#order-card-${orderNumber} .footer-actions-group`);
                     const checkoutBtn = document.createElement('button');
                     checkoutBtn.className = 'btn-start-preparing btn-action-checkout';
                     checkoutBtn.dataset.orderNumber = orderNumber;
                     checkoutBtn.dataset.total = document.getElementById(`order-total-${orderNumber}`)
                         .textContent.replace('₱', '').replace(/,/g, '');
-                    checkoutBtn.dataset.customerName = document.querySelector(
-                        `#order-card-${orderNumber} .customer-info`).textContent.split('(')[0].trim();
+                    checkoutBtn.dataset.customerName = card.querySelector('.customer-info')
+                        .textContent.split('(')[0].trim();
                     checkoutBtn.style.background = '#0284c7';
                     checkoutBtn.innerHTML = '<i class="bi bi-cart-check-fill"></i> Checkout';
                     footerGroup.appendChild(checkoutBtn);
