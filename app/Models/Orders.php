@@ -30,4 +30,9 @@ class Orders extends Model
         'cashier_id',
         'admin_id',
     ];
+
+    public function product()
+    {
+        return $this->belongsTo(Products::class, 'products_id');
+    }
 }

@@ -15,6 +15,12 @@
 
 <body>
 
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner-brand"></div>
+        <div class="loading-text">Creating Your Account...</div>
+        <div class="loading-subtext">This may take a moment as we process your registration.</div>
+    </div>
+
     <div class="login-container">
         <!-- Left Side: Visual/Brand -->
         <div class="login-visual">
@@ -84,7 +90,7 @@
                         </div>
                     </div>
 
-                    <button type="submit" class="btn btn-brand w-100">Create Account</button>
+                    <button type="submit" class="btn btn-brand w-100" id="submitBtn">Create Account</button>
 
                     <div class="text-center mt-4">
                         <p class="small text-muted">Already have an account? <a
@@ -98,6 +104,22 @@
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js"></script>
     <script>
+        // Form Loading Logic
+        const registrationForm = document.querySelector('form');
+        const submitBtn = document.querySelector('#submitBtn');
+        const loadingOverlay = document.querySelector('#loadingOverlay');
+
+        if (registrationForm) {
+            registrationForm.addEventListener('submit', function() {
+                // Show loading overlay
+                loadingOverlay.style.display = 'flex';
+                
+                // Disable button and change text
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Processing...';
+            });
+        }
+
         // Password Visibility Toggle
         const togglePassword = document.querySelector('#togglePassword');
         const password = document.querySelector('#password');

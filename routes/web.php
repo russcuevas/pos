@@ -9,6 +9,7 @@ use App\Http\Controllers\admin\AdminProductsController;
 use App\Http\Controllers\auth\AuthController;
 use App\Http\Controllers\customers\CustomersHomeController;
 use App\Http\Controllers\customers\CustomersCartController;
+use App\Http\Controllers\customers\CustomersOrderController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -89,4 +90,11 @@ Route::middleware(['customer'])->group(function () {
     Route::post('customers/cart/update', [CustomersCartController::class, 'CustomersUpdateCart'])->name('customers.cart.update');
     Route::post('customers/cart/delete', [CustomersCartController::class, 'CustomersDeleteCart'])->name('customers.cart.delete');
     Route::post('customers/cart/checkout', [CustomersCartController::class, 'CustomersCheckout'])->name('customers.cart.checkout');
+
+    // CUSTOMERS ORDERS
+    Route::get('customers/my_orders', [CustomersOrderController::class, 'CustomersOrdersPage'])->name('customers.orders.page');
+    Route::post('customers/orders/update-quantity', [CustomersOrderController::class, 'UpdateOrderQuantity'])->name('customers.orders.update_qty');
+    Route::post('customers/orders/send-chat', [CustomersOrderController::class, 'SendChat'])->name('customers.orders.send_chat');
+    Route::get('customers/orders/messages/{order_number}', [CustomersOrderController::class, 'GetMessages'])->name('customers.orders.get_messages');
+    Route::post('customers/orders/add-item', [CustomersOrderController::class, 'AddOrderItem'])->name('customers.orders.add_item');
 });
