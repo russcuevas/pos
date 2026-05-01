@@ -8,6 +8,7 @@ use App\Http\Controllers\admin\AdminPOSController;
 use App\Http\Controllers\admin\AdminProductsController;
 use App\Http\Controllers\auth\AuthController;
 use App\Http\Controllers\customers\CustomersHomeController;
+use App\Http\Controllers\customers\CustomersCartController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -80,4 +81,8 @@ Route::middleware(['admin'])->group(function () {
 
 Route::middleware(['customer'])->group(function () {
     Route::get('customers/home', [CustomersHomeController::class, 'CustomerHomePage'])->name('customers.home.page');
+    Route::post('customers/cart/add', [CustomersCartController::class, 'CustomersAddToCart'])->name('customers.cart.add');
+    Route::get('customers/cart/get', [CustomersCartController::class, 'CustomersGetCart'])->name('customers.cart.get');
+    Route::post('customers/cart/update', [CustomersCartController::class, 'CustomersUpdateCart'])->name('customers.cart.update');
+    Route::post('customers/cart/delete', [CustomersCartController::class, 'CustomersDeleteCart'])->name('customers.cart.delete');
 });

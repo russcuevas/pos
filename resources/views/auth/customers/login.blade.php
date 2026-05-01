@@ -24,7 +24,7 @@
                 <img src="{{ asset('image/logo.png') }}" alt="POS Logo"
                     style="max-height: 80px; margin-bottom: 2rem; filter: brightness(0) invert(1);">
                 <h1>Welcome to Our Store.</h1>
-                <p>Access your personalized dashboard to track your orders, manage your account, and enjoy a seamless
+                <p>Access your page to track your orders, manage your account, and enjoy a seamless
                     shopping experience.</p>
             </div>
         </div>

@@ -8,39 +8,36 @@
         </div>
     </a>
 
-    <!-- Hamburger button -->
-    <button class="menu-toggler d-lg-none ms-auto" type="button" data-bs-toggle="collapse" data-bs-target="#topNavMenu"
-        aria-expanded="false" aria-controls="topNavMenu">
-        <i class="bi bi-list"></i>
-    </button>
+    <!-- Right Side Actions (Always Visible) -->
+    <div class="d-flex align-items-center gap-2 ms-auto">
+        <!-- Home -->
+        <a href="{{ route('customers.home.page') }}"
+            class="nav-icon-pill {{ request()->routeIs('customers.home.page') ? 'active' : '' }}">
+            <i class="bi bi-house-fill"></i>
+        </a>
 
-    <!-- Collapsible Content -->
-    <div class="collapse d-lg-flex top-nav-menu flex-grow-1 ms-lg-3" id="topNavMenu">
-        <div class="nav-menu-inner d-flex w-100 gap-2">
+        <!-- Receipt -->
+        <a href="#" class="nav-icon-pill">
+            <i class="bi bi-receipt"></i>
+        </a>
 
-            <div class="ms-lg-auto d-flex flex-wrap align-items-center gap-2 right-actions">
+        <!-- Cart -->
+        <a href="#" class="nav-icon-pill" id="cartToggle">
+            <i class="bi bi-cart"></i>
+        </a>
 
-                <a href="{{ route('customers.home.page') }}"
-                    class="nav-icon-pill {{ request()->routeIs('customers.home.page') ? 'active' : '' }}">
-                    <i class="bi bi-house-fill"></i>
-                </a>
-                <a href="#" class="nav-icon-pill">
-                    <i class="bi bi-receipt"></i>
-                </a>
-                <a href="#" class="nav-icon-pill">
-                    <i class="bi bi-cart"></i>
-                </a>
-                <button class="theme-toggle" id="posThemeToggle" type="button" aria-label="Toggle dark mode"
-                    style="background:transparent;border:none;color:white;font-size:1.2rem;cursor:pointer;">
-                    <i class="bi bi-moon-stars" id="posThemeToggleIcon"></i>
-                </button>
-                <form action="{{ route('customers.logout') }}" method="POST">
-                    @csrf
-                    <button type="submit" class="nav-icon-pill border-0 bg-transparent" style="color: white;">
-                        <i class="bi bi-box-arrow-right"></i>
-                    </button>
-                </form>
-            </div>
-        </div>
+        <!-- Theme Toggle -->
+        <button class="theme-toggle" id="posThemeToggle" type="button" aria-label="Toggle dark mode"
+            style="background:transparent;border:none;color:white;font-size:1.2rem;cursor:pointer;">
+            <i class="bi bi-moon-stars" id="posThemeToggleIcon"></i>
+        </button>
+
+        <!-- Logout -->
+        <form action="{{ route('customers.logout') }}" method="POST" class="m-0">
+            @csrf
+            <button type="submit" class="nav-icon-pill border-0 bg-transparent" style="color: white; padding: 0;">
+                <i class="bi bi-box-arrow-right"></i>
+            </button>
+        </form>
     </div>
 </nav>

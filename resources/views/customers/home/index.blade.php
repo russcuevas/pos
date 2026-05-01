@@ -13,48 +13,6 @@
     <link rel="stylesheet" href="{{ asset('assets/customers-style.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/customers-home.css') }}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css">
-    <style>
-        .qty-quick-btn {
-            background-color: #e0f2fe;
-            color: #0284c7;
-            border: none;
-            border-radius: 8px;
-            width: 50px;
-            height: 45px;
-            font-weight: 600;
-            transition: all 0.2s;
-        }
-
-        .qty-quick-btn:hover {
-            background-color: #bae6fd;
-            color: #0369a1;
-        }
-
-        .dark-mode .modal-content {
-            background-color: var(--pos-bg);
-            border: 1px solid var(--pos-border);
-        }
-
-        .dark-mode #qtyModalLabel {
-            color: var(--text-primary) !important;
-        }
-
-        .dark-mode .qty-quick-btn {
-            background-color: rgba(2, 132, 199, 0.2);
-            color: #38bdf8;
-        }
-
-        .dark-mode .qty-quick-btn:hover {
-            background-color: rgba(2, 132, 199, 0.4);
-            color: #7dd3fc;
-        }
-
-        .dark-mode #customQtyInput {
-            background-color: var(--pos-bg-alt);
-            color: var(--text-primary);
-            border-color: var(--pos-border) !important;
-        }
-    </style>
 </head>
 
 <body class="pos-page">
@@ -100,7 +58,7 @@
                                 <div class="pcard-price">₱{{ number_format($product->selling_price, 2) }}</div>
 
                                 @if ($product->quantity > 0)
-                                    <button class="btn-add">
+                                    <button class="btn-add" data-id="{{ $product->id }}">
                                         <i class="bi bi-plus"></i> Add
                                     </button>
                                 @else
@@ -123,6 +81,32 @@
         </div><!-- /products-pane -->
 
     </div><!-- /pos-wrap -->
+
+    <div class="cart-overlay" id="cartOverlay"></div>
+
+    <div class="cart-sidebar" id="cartSidebar">
+        <div class="cart-header">
+            <h5 class="cart-title">Your order</h5>
+            <button class="btn-close-cart" id="closeCart">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+        <div class="cart-body" id="cartItemsContainer">
+            <!-- Cart items will be loaded here -->
+            <div class="text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+        </div>
+        <div class="cart-footer">
+            <div class="cart-total-wrap">
+                <span class="cart-total-label">Total</span>
+                <span class="cart-total-value" id="cartTotal">₱0.00</span>
+            </div>
+            <button class="btn-checkout">Checkout</button>
+        </div>
+    </div>
 
 
 
@@ -158,7 +142,7 @@
         });
 
         const THEME_KEY = 'naap-theme';
-        const themeBtn = document.getElementById('posThemeToggle');
+        const themeBtns = document.querySelectorAll('#posThemeToggle, #posThemeToggleMobile');
         const themeIcon = document.getElementById('posThemeToggleIcon');
 
         function applyTheme(theme) {
@@ -172,14 +156,14 @@
         const storedTheme = localStorage.getItem(THEME_KEY) || 'light';
         applyTheme(storedTheme);
 
-        if (themeBtn) {
-            themeBtn.addEventListener('click', () => {
+        themeBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
                 const isDark = document.body.classList.contains('dark-mode');
                 const nextTheme = isDark ? 'light' : 'dark';
                 localStorage.setItem(THEME_KEY, nextTheme);
                 applyTheme(nextTheme);
             });
-        }
+        });
 
         // Product Search Functionality (Vanilla JS)
         document.getElementById('productSearch').addEventListener('keyup', function() {
@@ -203,6 +187,248 @@
                 emptyState.style.display = visibleCount === 0 ? "block" : "none";
             }
         });
+
+        // Cart Functionality
+        const cartSidebar = document.getElementById('cartSidebar');
+        const cartOverlay = document.getElementById('cartOverlay');
+        const cartItemsContainer = document.getElementById('cartItemsContainer');
+        const cartTotalElement = document.getElementById('cartTotal');
+
+        function toggleCart(show) {
+            if (show) {
+                cartSidebar.classList.add('open');
+                cartOverlay.classList.add('show');
+                loadCart();
+            } else {
+                cartSidebar.classList.remove('open');
+                cartOverlay.classList.remove('show');
+            }
+        }
+
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('#cartToggle')) {
+                e.preventDefault();
+                toggleCart(true);
+            }
+            if (e.target.closest('#closeCart') || e.target === cartOverlay) {
+                toggleCart(false);
+            }
+
+            // Add to Cart Logic
+            if (e.target.closest('.btn-add')) {
+                const btn = e.target.closest('.btn-add');
+                const productId = btn.dataset.id;
+                addToCart(productId);
+            }
+
+            // Update Cart Quantity
+            if (e.target.closest('.btn-qty-adj')) {
+                const btn = e.target.closest('.btn-qty-adj');
+                const cartId = btn.dataset.cartId;
+                const action = btn.dataset.action;
+                updateCartQty(cartId, action);
+            }
+
+            // Remove from Cart
+            if (e.target.closest('.btn-remove-item')) {
+                const btn = e.target.closest('.btn-remove-item');
+                const cartId = btn.dataset.cartId;
+                deleteCartItem(cartId);
+            }
+        });
+
+        async function addToCart(productId) {
+            try {
+                const response = await fetch("{{ route('customers.cart.add') }}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({
+                        product_id: productId,
+                        quantity: 1
+                    })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    notyf.success(data.message);
+                    if (cartSidebar.classList.contains('open')) {
+                        loadCart();
+                    }
+                } else {
+                    notyf.error(data.message);
+                }
+            } catch (error) {
+                console.error('Error adding to cart:', error);
+                notyf.error('An error occurred.');
+            }
+        }
+
+        async function updateCartQty(cartId, action) {
+            try {
+                const response = await fetch("{{ route('customers.cart.update') }}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({
+                        cart_id: cartId,
+                        action: action
+                    })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    loadCart();
+                } else {
+                    notyf.error(data.message);
+                }
+            } catch (error) {
+                console.error('Error updating cart:', error);
+            }
+        }
+
+        async function deleteCartItem(cartId) {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "Remove this item from your cart?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: 'Yes, remove it!'
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    try {
+                        const response = await fetch("{{ route('customers.cart.delete') }}", {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                            },
+                            body: JSON.stringify({
+                                cart_id: cartId
+                            })
+                        });
+
+                        const data = await response.json();
+                        if (data.success) {
+                            notyf.success(data.message);
+                            loadCart();
+                        } else {
+                            notyf.error(data.message);
+                        }
+                    } catch (error) {
+                        console.error('Error deleting cart item:', error);
+                    }
+                }
+            });
+        }
+
+        async function loadCart() {
+            cartItemsContainer.innerHTML = `
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            `;
+
+            try {
+                const response = await fetch("{{ route('customers.cart.get') }}");
+                const data = await response.json();
+
+                if (data.success) {
+                    renderCart(data.cart);
+                } else {
+                    cartItemsContainer.innerHTML =
+                        `<p class="text-center text-muted">${data.message || 'Error loading cart'}</p>`;
+                }
+            } catch (error) {
+                console.error('Error loading cart:', error);
+                cartItemsContainer.innerHTML = '<p class="text-center text-muted">Error loading cart.</p>';
+            }
+        }
+
+        function renderCart(cartItems) {
+            if (cartItems.length === 0) {
+                cartItemsContainer.innerHTML = `
+                    <div class="text-center py-5">
+                        <i class="bi bi-cart-x fs-1 text-muted opacity-50"></i>
+                        <p class="mt-2 text-muted">Your cart is empty</p>
+                    </div>
+                `;
+                cartTotalElement.textContent = '₱0.00';
+                return;
+            }
+
+            let html = '';
+            let total = 0;
+
+            cartItems.forEach(item => {
+                const product = item.product;
+                const totalLinePrice = item.line_total;
+                total += totalLinePrice;
+
+                const imgSrc = product.product_image ?
+                    `{{ asset('images/products/') }}/${product.product_image}` :
+                    '';
+
+                let priceDetailHtml = '';
+                if (item.wholesale_bundles > 0) {
+                    priceDetailHtml = `
+                        <div class="text-end">
+                            <span class="wholesale-badge">Wholesale Applied</span>
+                            <div class="cart-item-price">₱${parseFloat(totalLinePrice).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
+                            <small class="text-muted d-block" style="font-size: 0.7rem; line-height: 1.2;">
+                                ${parseFloat(item.wholesale_bundles)}x (Whole)
+                                ${item.regular_items > 0 ? `<br>${parseFloat(item.regular_items)}x (Retail)` : ''}
+                            </small>
+                        </div>
+                    `;
+                } else {
+                    priceDetailHtml = `
+                        <div class="cart-item-price">₱${parseFloat(totalLinePrice).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
+                    `;
+                }
+
+                html += `
+                    <div class="cart-item">
+                        ${product.product_image ? 
+                            `<img src="${imgSrc}" class="cart-item-img" alt="${product.product_name}">` : 
+                            `<div class="cart-item-img d-flex align-items-center justify-content-center bg-light fs-4">📦</div>`
+                        }
+                        <div class="cart-item-info">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="cart-item-name">${product.product_name}</div>
+                                <button class="btn-remove-item" data-cart-id="${item.id}">
+                                    <i class="bi bi-x"></i>
+                                </button>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mt-2">
+                                <div class="cart-qty-wrap">
+                                    <button class="btn-qty-adj" data-cart-id="${item.id}" data-action="decrement">
+                                        <i class="bi bi-dash-circle"></i>
+                                    </button>
+                                    <span class="cart-item-qty-val">${parseFloat(item.quantity)}</span>
+                                    <button class="btn-qty-adj" data-cart-id="${item.id}" data-action="increment">
+                                        <i class="bi bi-plus-circle"></i>
+                                    </button>
+                                </div>
+                                ${priceDetailHtml}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            cartItemsContainer.innerHTML = html;
+            cartTotalElement.textContent =
+                `₱${total.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+        }
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
