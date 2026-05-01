@@ -22,8 +22,13 @@
         </a>
 
         <!-- Cart -->
-        <a href="#" class="nav-icon-pill" id="cartToggle">
+        <a href="#" class="nav-icon-pill position-relative" id="cartToggle">
             <i class="bi bi-cart"></i>
+            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger cart-badge" 
+                  id="cartCountBadge" 
+                  style="font-size: 0.65rem; display: {{ ($cartCount ?? 0) > 0 ? 'block' : 'none' }};">
+                {{ $cartCount ?? 0 }}
+            </span>
         </a>
 
         <!-- Theme Toggle -->

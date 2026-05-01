@@ -100,6 +100,10 @@
             </div>
         </div>
         <div class="cart-footer">
+            <div class="cart-note-wrap mb-3">
+                <label for="orderNote" class="form-label small fw-bold text-muted mb-1">Add a note (optional)</label>
+                <textarea class="form-control form-control-sm" id="orderNote" rows="2" placeholder="Special instructions..."></textarea>
+            </div>
             <div class="cart-total-wrap">
                 <span class="cart-total-label">Total</span>
                 <span class="cart-total-value" id="cartTotal">₱0.00</span>
@@ -235,7 +239,77 @@
                 const cartId = btn.dataset.cartId;
                 deleteCartItem(cartId);
             }
+
+            // Checkout Logic
+            if (e.target.closest('.btn-checkout')) {
+                checkout();
+            }
         });
+
+        async function checkout() {
+            const cartItems = document.querySelectorAll('.cart-item');
+            if (cartItems.length === 0) {
+                notyf.error('Your cart is empty.');
+                return;
+            }
+
+            Swal.fire({
+                title: 'Place Order?',
+                text: "Are you sure you want to proceed with the checkout?",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#0284c7',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: 'Yes, checkout!'
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    try {
+                        Swal.fire({
+                            title: 'Processing...',
+                            text: 'Please wait while we place your order.',
+                            allowOutsideClick: false,
+                            didOpen: () => {
+                                Swal.showLoading();
+                            }
+                        });
+
+                        const note = document.getElementById('orderNote').value;
+
+                        const response = await fetch("{{ route('customers.cart.checkout') }}", {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                            },
+                            body: JSON.stringify({
+                                note: note
+                            })
+                        });
+
+                        const data = await response.json();
+                        Swal.close();
+
+                        if (data.success) {
+                            Swal.fire({
+                                title: 'Success!',
+                                text: data.message,
+                                icon: 'success'
+                            }).then(() => {
+                                toggleCart(false);
+                                document.getElementById('orderNote').value = '';
+                                loadCart(); // This will clear the UI
+                            });
+                        } else {
+                            notyf.error(data.message);
+                        }
+                    } catch (error) {
+                        console.error('Error during checkout:', error);
+                        Swal.close();
+                        notyf.error('An error occurred during checkout.');
+                    }
+                }
+            });
+        }
 
         async function addToCart(productId) {
             try {
@@ -254,6 +328,14 @@
                 const data = await response.json();
                 if (data.success) {
                     notyf.success(data.message);
+                    
+                    // Update Badge
+                    const badge = document.getElementById('cartCountBadge');
+                    if (badge && data.cart_count !== undefined) {
+                        badge.textContent = data.cart_count;
+                        badge.style.display = data.cart_count > 0 ? 'block' : 'none';
+                    }
+
                     if (cartSidebar.classList.contains('open')) {
                         loadCart();
                     }
@@ -354,6 +436,13 @@
         }
 
         function renderCart(cartItems) {
+            // Update Navbar Badge
+            const badge = document.getElementById('cartCountBadge');
+            if (badge) {
+                badge.textContent = cartItems.length;
+                badge.style.display = cartItems.length > 0 ? 'block' : 'none';
+            }
+
             if (cartItems.length === 0) {
                 cartItemsContainer.innerHTML = `
                     <div class="text-center py-5">

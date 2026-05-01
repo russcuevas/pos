@@ -29,7 +29,6 @@ class OrdersTableSeeder extends Seeder
             'order_type' => 'Walk in',
             'order_status' => 'Pending',
             'delivery_fee' => 0,
-            'remarks' => 'No remarks',
             'cashier_id' => null,
             'admin_id' => 1,
         ]);
@@ -50,7 +49,6 @@ class OrdersTableSeeder extends Seeder
             'order_type' => 'Walk in',
             'order_status' => 'Pending',
             'delivery_fee' => 0,
-            'remarks' => 'No remarks',
             'cashier_id' => 1,
             'admin_id' => null,
         ]);
@@ -71,7 +69,6 @@ class OrdersTableSeeder extends Seeder
             'order_type' => 'Online',
             'order_status' => 'Pending',
             'delivery_fee' => 0,
-            'remarks' => 'Pickup in ko dyan',
             'cashier_id' => null,
             'admin_id' => null,
         ]);

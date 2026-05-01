@@ -80,9 +80,13 @@ Route::middleware(['admin'])->group(function () {
 
 
 Route::middleware(['customer'])->group(function () {
+    // CUSTOMERS HOME PAGE
     Route::get('customers/home', [CustomersHomeController::class, 'CustomerHomePage'])->name('customers.home.page');
+
+    // CUSTOMERS CART
     Route::post('customers/cart/add', [CustomersCartController::class, 'CustomersAddToCart'])->name('customers.cart.add');
     Route::get('customers/cart/get', [CustomersCartController::class, 'CustomersGetCart'])->name('customers.cart.get');
     Route::post('customers/cart/update', [CustomersCartController::class, 'CustomersUpdateCart'])->name('customers.cart.update');
     Route::post('customers/cart/delete', [CustomersCartController::class, 'CustomersDeleteCart'])->name('customers.cart.delete');
+    Route::post('customers/cart/checkout', [CustomersCartController::class, 'CustomersCheckout'])->name('customers.cart.checkout');
 });

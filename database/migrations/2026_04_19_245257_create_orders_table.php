@@ -26,11 +26,10 @@ return new class extends Migration
             $table->decimal('total_price', 10, 2);
             $table->decimal('payment_amount', 10, 2)->nullable();
             $table->decimal('change_amount', 10, 2)->nullable();
-            $table->string('payment_method');
+            $table->string('payment_method')->nullable();
             $table->string('order_type');
             $table->string('order_status')->default('pending');
             $table->decimal('delivery_fee', 10, 2)->nullable();
-            $table->text('remarks')->nullable();
             $table->foreignId('cashier_id')->nullable()->constrained('cashiers')->onDelete('cascade');
             $table->foreignId('admin_id')->nullable()->constrained('admins')->onDelete('cascade');
             $table->timestamps();

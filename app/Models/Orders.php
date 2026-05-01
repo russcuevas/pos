@@ -27,7 +27,6 @@ class Orders extends Model
         'order_type',
         'order_status',
         'delivery_fee',
-        'remarks',
         'cashier_id',
         'admin_id',
     ];
