@@ -80,10 +80,12 @@
                 <a href="{{ route('admin.dashboard.page') }}" class="nav-pill"><i class="bi bi-speedometer2"></i>
                     Dashboard</a>
                 <a href="#" class="nav-pill active"><i class="bi bi-calculator"></i> POS</a>
-                <a href="#" class="nav-pill"><i class="bi bi-list-ul"></i> Orders</a>
-                <a href="#" class="nav-pill">
+                <a href="{{ route('admin.orders.page') }}" class="nav-pill"><i class="bi bi-list-ul"></i> Orders</a>
+                <a href="{{ route('admin.pending_orders.page') }}" class="nav-pill">
                     <i class="bi bi-hourglass-split"></i> Pending
-                    <span class="nav-badge">1</span>
+                    @if(isset($pending_count) && $pending_count > 0)
+                        <span class="nav-badge">{{ $pending_count }}</span>
+                    @endif
                 </a>
 
                 <div class="ms-lg-auto d-flex flex-wrap align-items-center gap-2 right-actions">

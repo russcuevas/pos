@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\admin\AdminCashiersController;
+use App\Http\Controllers\admin\AdminOrdersController;
 use App\Http\Controllers\admin\AdminDashboardController;
 use App\Http\Controllers\admin\AdminInventoryController;
 use App\Http\Controllers\admin\AdminPendingOrdersController;
@@ -87,6 +88,8 @@ Route::middleware(['admin'])->group(function () {
     Route::get('/admin/pending_orders/check', [AdminPendingOrdersController::class, 'CheckNewOrders'])->name('admin.pending_orders.check');
     Route::get('/admin/pending_orders/fetch-card/{order_number}', [AdminPendingOrdersController::class, 'FetchOrderCard'])->name('admin.pending_orders.fetch_card');
     Route::post('/admin/pending_orders/checkout', [AdminPendingOrdersController::class, 'CheckoutOrder'])->name('admin.pending_orders.checkout');
+    // ADMIN ORDERS
+    Route::get('/admin/orders', [AdminOrdersController::class, 'AdminOrdersPage'])->name('admin.orders.page');
 });
 
 

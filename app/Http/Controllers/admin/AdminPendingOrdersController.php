@@ -328,7 +328,6 @@ class AdminPendingOrdersController extends Controller
                 $item->payment_amount = $paymentAmount;
                 $item->change_amount = $changeAmount;
                 $item->discount_price = $discount;
-                $item->total_price = $totalPrice;
                 $item->save();
 
                 // Deduct stock if it's a product

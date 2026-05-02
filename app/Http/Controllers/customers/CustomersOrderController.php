@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use App\Models\Orders;
 use App\Models\OrdersChats;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class CustomersOrderController extends Controller
 {
@@ -89,7 +90,7 @@ class CustomersOrderController extends Controller
             $orderItem->products_id = $productId;
             $orderItem->quantity = 1;
             $orderItem->order_status = $existingOrder->order_status;
-            
+
             // Copy metadata from existing order
             $orderItem->customer_name = $existingOrder->customer_name;
             $orderItem->customer_phone = $existingOrder->customer_phone;
@@ -266,13 +267,13 @@ class CustomersOrderController extends Controller
     public function GetOrdersStatus()
     {
         $customerId = Auth::guard('web')->id();
-        
+
         // Get statuses
         $orders = Orders::where('customer_id', $customerId)
             ->select('order_number', 'order_status')
             ->get()
             ->groupBy('order_number');
-            
+
         $statuses = $orders->map(function ($items) {
             return $items->first()->order_status;
         });
@@ -282,12 +283,12 @@ class CustomersOrderController extends Controller
         $chatCounts = OrdersChats::join('orders', 'orders_chats.order_id', '=', 'orders.id')
             ->whereIn('orders.order_number', $orderNumbers)
             ->where('orders.customer_id', $customerId)
-            ->select('orders.order_number', \DB::raw('count(*) as total'))
+            ->select('orders.order_number', DB::raw('count(*) as total'))
             ->groupBy('orders.order_number')
             ->pluck('total', 'orders.order_number');
 
         return response()->json([
-            'success' => true, 
+            'success' => true,
             'statuses' => $statuses,
             'chat_counts' => $chatCounts
         ]);

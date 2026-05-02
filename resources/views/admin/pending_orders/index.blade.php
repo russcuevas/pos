@@ -451,7 +451,7 @@
                 <a href="{{ route('admin.dashboard.page') }}" class="nav-pill"><i class="bi bi-speedometer2"></i>
                     Dashboard</a>
                 <a href="{{ route('admin.pos.page') }}" class="nav-pill"><i class="bi bi-calculator"></i> POS</a>
-                <a href="#" class="nav-pill"><i class="bi bi-list-ul"></i> Orders</a>
+                <a href="{{ route('admin.orders.page') }}" class="nav-pill"><i class="bi bi-list-ul"></i> Orders</a>
                 <a href="{{ route('admin.pending_orders.page') }}" class="nav-pill active">
                     <i class="bi bi-hourglass-split"></i> Pending
                     <span class="nav-badge" id="pending-count-badge">{{ count($orders) }}</span>

@@ -51,7 +51,7 @@ class AdminPOSController extends Controller
             $subtotal += $line_total;
         }
 
-        $profit = $subtotal - $total_cost;
+        $profit = $total_cost; // Since total_cost is sum(qty * supplier_price) and the user wants this as profit
 
         $savedOrdersData = SaveOrders::where('admin_id', $admin_id)
             ->leftJoin('products', 'save_orders.product_id', '=', 'products.id')
@@ -61,7 +61,11 @@ class AdminPOSController extends Controller
 
         $savedOrders = $savedOrdersData->groupBy('reference_save_order');
 
-        return view('admin.pos.index', compact('products', 'cartItems', 'subtotal', 'profit', 'savedOrders'));
+        $pending_count = Orders::whereNotIn('order_status', ['Completed', 'Cancelled'])
+            ->distinct('order_number')
+            ->count('order_number');
+
+        return view('admin.pos.index', compact('products', 'cartItems', 'subtotal', 'profit', 'savedOrders', 'pending_count'));
     }
 
     public function AdminAddToCart(Request $request)
@@ -128,7 +132,10 @@ class AdminPOSController extends Controller
     public function AdminCheckout(Request $request)
     {
         $admin_id = Auth::guard('admin')->id();
-        $cartItems = CashiersCarts::where('admin_id', $admin_id)->get();
+        $cartItems = CashiersCarts::where('admin_id', $admin_id)
+            ->leftJoin('products', 'cashiers_carts.product_id', '=', 'products.id')
+            ->select('cashiers_carts.*', 'products.selling_price', 'products.whole_sale_qty', 'products.whole_sale_price')
+            ->get();
 
         if ($cartItems->isEmpty()) {
             return back()->with('error', 'Cart is empty!');
@@ -144,21 +151,34 @@ class AdminPOSController extends Controller
             'total_price' => 'required|numeric|min:0',
         ]);
 
-        $total_price = $request->total_price;
+        $order_total_price = $request->total_price;
         $payment_amount = $request->payment_amount;
         $discount_price = $request->discount_price ?? 0;
 
-        if ($payment_amount < $total_price) {
+        if ($payment_amount < $order_total_price) {
             return back()->with('error', 'Payment amount is less than total due!');
         }
 
-        $change_amount = $payment_amount - $total_price;
+        $change_amount = $payment_amount - $order_total_price;
 
         $maxOrderNum = Orders::selectRaw('MAX(CAST(REPLACE(order_number, "#OR", "") AS UNSIGNED)) as max_num')->value('max_num');
         $orId = $maxOrderNum ? $maxOrderNum + 1 : 1;
         $order_number = '#OR' . $orId;
 
         foreach ($cartItems as $item) {
+            $item_line_total = 0;
+            if ($item->product_id) {
+                if (!empty($item->whole_sale_qty) && $item->whole_sale_qty > 0 && $item->quantity >= $item->whole_sale_qty) {
+                    $wholesale_bundles = floor($item->quantity / $item->whole_sale_qty);
+                    $regular_items = fmod($item->quantity, $item->whole_sale_qty);
+                    $item_line_total = ($wholesale_bundles * $item->whole_sale_price) + ($regular_items * $item->selling_price);
+                } else {
+                    $item_line_total = $item->quantity * $item->selling_price;
+                }
+            } else {
+                $item_line_total = $item->quantity * $item->custom_price;
+            }
+
             Orders::create([
                 'order_number' => $order_number,
                 'products_id' => $item->product_id,
@@ -170,7 +190,7 @@ class AdminPOSController extends Controller
                 'address' => $request->address,
                 'quantity' => $item->quantity,
                 'discount_price' => $discount_price,
-                'total_price' => $total_price,
+                'total_price' => $item_line_total,
                 'payment_amount' => $payment_amount,
                 'change_amount' => $change_amount,
                 'payment_method' => $request->payment_method,
@@ -183,7 +203,7 @@ class AdminPOSController extends Controller
             ]);
 
             if ($item->product_id) {
-                $product = Products::find($item->product_id);
+                $product = \App\Models\Products::find($item->product_id);
                 if ($product) {
                     $product->quantity = max(0, $product->quantity - $item->quantity);
                     $product->save();
