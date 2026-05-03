@@ -696,6 +696,16 @@
                     <small class="text-muted" id="returnOrderNumber">Order #6f992d</small>
                 </div>
                 <div class="modal-body p-0">
+                    <!-- History Section -->
+                    <div id="returnHistorySection" class="p-3 bg-light border-bottom" style="display: none; max-height: 200px; overflow-y: auto;">
+                        <h6 class="fw-bold text-muted mb-2 small d-flex align-items-center gap-2">
+                            <i class="bi bi-clock-history"></i> Previous Return History
+                        </h6>
+                        <div id="returnHistoryList">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+
                     <!-- Step 1: Select Items -->
                     <div class="return-step active" id="returnStep1">
                         <div class="return-modal-content">
@@ -821,11 +831,12 @@
         function renderReceipt(order) {
             let itemsHtml = '';
             order.items.forEach(item => {
+                const isReturned = (parseFloat(item.returned_quantity) >= parseFloat(item.quantity));
                 itemsHtml += `
-                    <div class="receipt-item-row">
+                    <div class="receipt-item-row" style="${isReturned ? 'opacity: 0.6; text-decoration: line-through;' : ''}">
                         <div>
                             <span class="receipt-item-name">${item.product?.product_name || 'Product'}</span>
-                            <span class="receipt-item-qty">${item.quantity} x ₱${parseFloat(item.total_price / item.quantity).toFixed(2)}</span>
+                            <span class="receipt-item-qty">${parseFloat(item.quantity)} x ₱${parseFloat(item.total_price / item.quantity).toFixed(2)}</span>
                         </div>
                         <div class="fw-bold">₱${parseFloat(item.total_price).toFixed(2)}</div>
                     </div>
@@ -853,7 +864,7 @@
                 <div class="receipt-summary">
                     <div class="summary-row">
                         <span>Subtotal</span>
-                        <span>₱${parseFloat(order.original_total).toFixed(2)}</span>
+                        <span>₱${parseFloat(order.original_total + (parseFloat(order.discount_price) || 0)).toFixed(2)}</span>
                     </div>
                     ${order.discount_price > 0 ? `
                         <div class="summary-row">
@@ -861,8 +872,20 @@
                             <span style="color: #ef4444;">-₱${parseFloat(order.discount_price).toFixed(2)}</span>
                         </div>
                         ` : ''}
+
+                    ${order.total_refunded > 0 ? `
+                        <div class="summary-row fw-bold border-top pt-2 mt-2" style="border-top-style: dashed !important;">
+                            <span>Original Total</span>
+                            <span>₱${parseFloat(order.original_total).toFixed(2)}</span>
+                        </div>
+                        <div class="summary-row" style="color: #ef4444;">
+                            <span>Refunds</span>
+                            <span>-₱${parseFloat(order.total_refunded).toFixed(2)}</span>
+                        </div>
+                    ` : ''}
+
                     <div class="summary-row total">
-                        <span>Total</span>
+                        <span>${order.total_refunded > 0 ? 'Net Total' : 'Total'}</span>
                         <span>₱${parseFloat(order.total_amount).toFixed(2)}</span>
                     </div>
                     <div class="summary-row mt-2">
@@ -899,6 +922,36 @@
         });
 
         function renderReturnItems(order) {
+            // Handle History
+            const historySection = document.getElementById('returnHistorySection');
+            const historyList = document.getElementById('returnHistoryList');
+            
+            if (order.returns && order.returns.length > 0) {
+                historySection.style.display = 'block';
+                let historyHtml = '';
+                order.returns.forEach(ret => {
+                    const date = new Date(ret.created_at).toLocaleString();
+                    let itemsDetail = '';
+                    ret.items.forEach(item => {
+                        itemsDetail += `<li class="small">${parseFloat(item.quantity)}x ${item.order_item?.product?.product_name || 'Product'} <span class="text-danger">(-₱${parseFloat(item.refund_amount).toFixed(2)})</span></li>`;
+                    });
+                    historyHtml += `
+                        <div class="mb-2 pb-2 border-bottom last-child-border-0">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="small fw-bold text-muted">${date}</span>
+                                <span class="badge bg-light text-dark border">₱${parseFloat(ret.refund_amount).toFixed(2)}</span>
+                            </div>
+                            <ul class="mb-0 ps-3">
+                                ${itemsDetail}
+                            </ul>
+                        </div>
+                    `;
+                });
+                historyList.innerHTML = historyHtml;
+            } else {
+                historySection.style.display = 'none';
+            }
+
             let itemsHtml = '';
             order.items.forEach(item => {
                 const productImg = item.product?.product_image 
@@ -906,36 +959,49 @@
                     : `{{ asset('assets/img/no-image.png') }}`;
                 
                 const unitPrice = parseFloat(item.total_price / item.quantity);
-                const showQtyInput = parseFloat(item.quantity) > 1;
+                const returnedQty = parseFloat(item.returned_quantity || 0);
+                const remainingQty = parseFloat(item.quantity) - returnedQty;
+                const isFullyReturned = remainingQty <= 0;
 
                 itemsHtml += `
-                    <div class="return-item-card flex-column align-items-start p-3" data-item-id="${item.id}">
+                    <div class="return-item-card flex-column align-items-start p-3 ${isFullyReturned ? 'opacity-50 pointer-events-none' : ''}" 
+                         data-item-id="${item.id}" 
+                         data-max-qty="${remainingQty}"
+                         style="${isFullyReturned ? 'cursor: not-allowed;' : ''}">
                         <div class="d-flex align-items-center w-100 gap-3 mb-2">
                             <img src="${productImg}" class="return-item-img" alt="Product" style="width: 60px; height: 60px;">
                             <div class="return-item-details">
                                 <div class="return-item-name" style="font-size: 1.1rem; font-weight: 700;">${item.product?.product_name || 'Product'}</div>
-                                <div class="return-item-meta" style="font-size: 0.9rem;">Original Qty: ${parseFloat(item.quantity)} • ₱${unitPrice.toFixed(2)}/unit</div>
+                                <div class="return-item-meta" style="font-size: 0.9rem;">
+                                    Original Qty: ${parseFloat(item.quantity)} • ₱${unitPrice.toFixed(2)}/unit
+                                    ${returnedQty > 0 ? `<br><span class="text-danger">(${returnedQty} already returned)</span>` : ''}
+                                </div>
                             </div>
-                            <div class="ms-auto return-checkbox-wrapper" style="width: 28px; height: 28px;">
-                                <i class="bi bi-check-lg" style="font-size: 1rem;"></i>
-                            </div>
+                            ${isFullyReturned ? `
+                                <div class="ms-auto"><span class="badge bg-secondary">Fully Returned</span></div>
+                            ` : `
+                                <div class="ms-auto return-checkbox-wrapper" style="width: 28px; height: 28px;">
+                                    <i class="bi bi-check-lg" style="font-size: 1rem;"></i>
+                                </div>
+                            `}
                         </div>
 
                         <div class="return-refund-details w-100 mt-2 pt-3" style="border-top: 1px solid #e0f2fe;">
-                            ${showQtyInput ? `
+                            @php $fractionalQtys = [0.25, 0.33, 0.5, 0.75]; @endphp
+                            ${ (remainingQty > 1 && ![0.25, 0.33, 0.5, 0.75].includes(Math.round(remainingQty * 100) / 100)) ? `
                             <div class="return-input-group justify-content-between">
                                 <div class="return-input-label" style="font-size: 0.85rem; color: #64748b;">RETURN QTY</div>
                                 <div class="return-input-wrapper" style="max-width: 200px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
                                     <div class="return-input-prefix bg-white"><i class="bi bi-box-seam"></i></div>
-                                    <input type="number" class="return-input qty-input" value="${parseFloat(item.quantity)}" max="${parseFloat(item.quantity)}" step="any" data-unit-price="${unitPrice}">
+                                    <input type="number" class="return-input qty-input" value="${remainingQty}" max="${remainingQty}" min="0.01" step="any" data-unit-price="${unitPrice}">
                                 </div>
                             </div>
-                            ` : ''}
+                            ` : `<input type="hidden" class="qty-input" value="${remainingQty}" data-unit-price="${unitPrice}">` }
                             <div class="return-input-group justify-content-between">
                                 <div class="return-input-label" style="font-size: 0.85rem; color: #64748b;">REFUND AMT.</div>
                                 <div class="return-input-wrapper" style="max-width: 200px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
                                     <div class="return-input-prefix bg-white"><span style="font-family: serif; font-weight: bold; color: #64748b;">₱</span></div>
-                                    <input type="number" class="return-input refund-input" value="${parseFloat(item.total_price).toFixed(2)}" step="0.01">
+                                    <input type="number" class="return-input refund-input" value="${(remainingQty * unitPrice).toFixed(2)}" step="0.01">
                                 </div>
                             </div>
                         </div>
@@ -945,21 +1011,13 @@
             returnItemsList.innerHTML = itemsHtml;
 
             // Add click handlers to cards
-            const cards = returnItemsList.querySelectorAll('.return-item-card');
+            const cards = returnItemsList.querySelectorAll('.return-item-card:not(.opacity-50)');
             cards.forEach(card => {
                 card.addEventListener('click', function(e) {
-                    // Prevent toggling if clicking inside an input group
                     if (e.target.closest('.return-input-group')) return;
-                    
                     this.classList.toggle('selected');
                     updateSelectedCount();
                 });
-            });
-
-            // Prevent card toggle when clicking inputs directly
-            const inputs = returnItemsList.querySelectorAll('.return-input');
-            inputs.forEach(input => {
-                input.addEventListener('click', (e) => e.stopPropagation());
             });
 
             // Auto-calculate refund when qty changes
@@ -969,8 +1027,14 @@
                     const card = this.closest('.return-item-card');
                     const refundInput = card.querySelector('.refund-input');
                     const unitPrice = parseFloat(this.getAttribute('data-unit-price'));
-                    const qty = parseFloat(this.value) || 0;
+                    const maxQty = parseFloat(card.getAttribute('data-max-qty'));
+                    let qty = parseFloat(this.value) || 0;
                     
+                    if (qty > maxQty) {
+                        qty = maxQty;
+                        this.value = maxQty;
+                    }
+
                     refundInput.value = (qty * unitPrice).toFixed(2);
                 });
             });
@@ -1048,6 +1112,63 @@
         document.getElementById('returnModal').addEventListener('hidden.bs.modal', function () {
             step2.classList.remove('active');
             step1.classList.add('active');
+        });
+
+        // --- Process Return AJAX ---
+        const btnConfirmReturn = document.getElementById('btnConfirmReturn');
+        btnConfirmReturn.addEventListener('click', function() {
+            const selectedCards = returnItemsList.querySelectorAll('.return-item-card.selected');
+            const items = [];
+            let totalRefund = 0;
+
+            selectedCards.forEach(card => {
+                const id = card.getAttribute('data-item-id');
+                const qty = card.querySelector('.qty-input').value;
+                const refund = card.querySelector('.refund-input').value;
+                
+                totalRefund += parseFloat(refund);
+                items.push({
+                    id: id,
+                    quantity: qty,
+                    refund_amount: refund
+                });
+            });
+
+            const source = document.querySelector('.source-card.active').getAttribute('data-source');
+            const orderNumber = returnOrderNumberText.innerText.replace('Order ', '');
+
+            btnConfirmReturn.disabled = true;
+            btnConfirmReturn.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...`;
+
+            fetch('{{ route("admin.orders.process_return") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({
+                    order_number: orderNumber,
+                    refund_source: source,
+                    refund_amount: totalRefund,
+                    items: items
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Error: ' + data.message);
+                    btnConfirmReturn.disabled = false;
+                    btnConfirmReturn.innerText = 'Process Return';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An unexpected error occurred.');
+                btnConfirmReturn.disabled = false;
+                btnConfirmReturn.innerText = 'Process Return';
+            });
         });
     </script>
 </body>

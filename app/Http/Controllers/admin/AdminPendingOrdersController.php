@@ -285,8 +285,13 @@ class AdminPendingOrdersController extends Controller
     public function StartPreparing(Request $request)
     {
         $orderNumber = $request->input('order_number');
+        $adminId = \Illuminate\Support\Facades\Auth::guard('admin')->id();
+
         \App\Models\Orders::where('order_number', $orderNumber)
-            ->update(['order_status' => 'Preparing']);
+            ->update([
+                'order_status' => 'Preparing',
+                'admin_id' => $adminId
+            ]);
 
         return response()->json(['success' => true, 'message' => 'Order preparation started.']);
     }

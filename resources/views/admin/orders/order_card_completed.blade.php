@@ -10,15 +10,19 @@
                 {{ $order->updated_at->format('n/j/Y, g:i:s A') }}</div>
         </div>
         <div class="text-end">
-            @if ($order->discount_price > 0)
+            @if ($order->total_refunded > 0 || ($order->discount_price > 0 && $order->original_total > $order->total_amount))
                 <div class="original-total"
                     style="text-decoration: line-through; color: #a0aec0; font-size: 0.85rem; font-weight: 600; margin-bottom: -4px;">
                     Original: ₱{{ number_format($order->original_total, 2) }}
                 </div>
+            @endif
+            
+            @if ($order->discount_price > 0)
                 <span style="color: #ef4444; font-size: 0.75rem; font-weight: 600;">
                     -₱{{ number_format($order->discount_price, 2) }} Discount
                 </span>
             @endif
+
             <div class="order-total"
                 style="font-size: 1.3rem; font-weight: 800; color: {{ $isCancelled ? '#94a3b8' : '#0284c7' }};">
                 ₱{{ number_format($order->total_amount, 2) }}
@@ -27,6 +31,11 @@
                 <div class="profit-text profit-info" style="color: #10b981; font-size: 0.85rem; font-weight: 700;">
                     Profit: ₱{{ number_format($order->total_profit, 2) }}
                 </div>
+                @if($order->total_refunded > 0)
+                    <div class="text-danger" style="font-size: 0.85rem; font-weight: 700;">
+                        Refunded: ₱{{ number_format($order->total_refunded, 2) }}
+                    </div>
+                @endif
             @endif
             <div class="status-badge mt-2"
                 style="background: {{ $isCancelled ? '#ef4444' : '#10b981' }}; color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700;">
@@ -38,20 +47,26 @@
     <div class="order-card-body">
         <div class="order-items-list">
             @foreach ($order->items as $item)
-                <div class="order-item-row" style="border-top: 1px solid #f1f5f9; padding: 10px 0;">
+                @php $isFullyReturned = $item->remaining_quantity <= 0; @endphp
+                <div class="order-item-row" style="border-top: 1px solid #f1f5f9; padding: 10px 0; {{ $isFullyReturned ? 'opacity: 0.6;' : '' }}">
                     <div class="item-info">
-                        <span class="item-name" style="font-weight: 600; color: #2d3748;">
+                        <span class="item-name" style="font-weight: 600; color: #2d3748; {{ $isFullyReturned ? 'text-decoration: line-through;' : '' }}">
                             {{ $item->quantity + 0 }}x {{ $item->product->product_name ?? 'Product' }}
                         </span>
+                        @if($item->returned_quantity > 0)
+                            <span class="badge {{ $isFullyReturned ? 'bg-secondary' : 'bg-warning text-dark' }} ms-1" style="font-size: 0.65rem;">
+                                {{ $isFullyReturned ? 'Returned' : 'Partially Returned (' . ($item->returned_quantity + 0) . ')' }}
+                            </span>
+                        @endif
                     </div>
                     <div class="text-end">
-                        <div class="item-price" style="font-weight: 700; color: #2d3748;">
+                        <div class="item-price" style="font-weight: 700; color: #2d3748; {{ $isFullyReturned ? 'text-decoration: line-through;' : '' }}">
                             ₱{{ number_format($item->total_price, 2) }}
                         </div>
                         @if (!$isCancelled)
                             <div class="item-profit profit-info"
-                                style="color: #10b981; font-size: 0.75rem; font-weight: 600;">
-                                Profit: ₱{{ number_format($item->profit, 2) }}
+                                style="color: #10b981; font-size: 0.75rem; font-weight: 600; {{ $isFullyReturned ? 'text-decoration: line-through;' : '' }}">
+                                Profit: ₱{{ number_format($item->active_profit, 2) }}
                             </div>
                         @endif
                     </div>

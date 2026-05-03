@@ -91,6 +91,7 @@ Route::middleware(['admin'])->group(function () {
 
     // ADMIN ORDERS
     Route::get('/admin/orders', [AdminOrdersController::class, 'AdminOrdersPage'])->name('admin.orders.page');
+    Route::post('/admin/orders/process-return', [AdminOrdersController::class, 'ProcessReturn'])->name('admin.orders.process_return');
 });
 
 
