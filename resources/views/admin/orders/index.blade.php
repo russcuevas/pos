@@ -276,6 +276,330 @@
             border-top-color: #374151;
             border-bottom-color: #374151;
         }
+
+        /* Return Modal Styling */
+        .return-modal-content {
+            padding: 20px;
+        }
+
+        .return-info-alert {
+            background: #f0f9ff;
+            border: 1px solid #bae6fd;
+            border-radius: 8px;
+            padding: 12px 16px;
+            color: #0369a1;
+            font-size: 0.85rem;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+        }
+
+        .return-item-card {
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: all 0.2s;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .return-item-card:hover {
+            border-color: #3b82f6;
+            background: #f8fafc;
+        }
+
+        .return-item-card.selected {
+            border-color: #3b82f6;
+            background: #eff6ff;
+            box-shadow: 0 0 0 1px #3b82f6;
+        }
+
+        .return-item-img {
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            object-fit: cover;
+            background: #f1f5f9;
+        }
+
+        .return-item-details {
+            flex: 1;
+        }
+
+        .return-item-name {
+            font-weight: 700;
+            color: #1e293b;
+            font-size: 0.95rem;
+            margin-bottom: 2px;
+        }
+
+        .return-item-meta {
+            font-size: 0.75rem;
+            color: #64748b;
+        }
+
+        .return-checkbox-wrapper {
+            width: 24px;
+            height: 24px;
+            border: 2px solid #cbd5e1;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .selected .return-checkbox-wrapper {
+            background: #3b82f6;
+            border-color: #3b82f6;
+        }
+
+        .return-checkbox-wrapper i {
+            color: white;
+            font-size: 0.8rem;
+            display: none;
+        }
+
+        .selected .return-checkbox-wrapper i {
+            display: block;
+        }
+
+        .return-modal-footer {
+            padding: 20px;
+            border-top: 1px solid #f1f5f9;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .dark-mode .return-info-alert {
+            background: rgba(3, 105, 161, 0.1);
+            border-color: #0369a1;
+            color: #7dd3fc;
+        }
+
+        .dark-mode .return-item-card {
+            background: #111827;
+            border-color: #1f2937;
+        }
+
+        .dark-mode .return-item-card:hover {
+            border-color: #3b82f6;
+            background: #1e293b;
+        }
+
+        .dark-mode .return-item-card.selected {
+            background: #1e3a8a;
+            border-color: #3b82f6;
+        }
+
+        .dark-mode .return-item-name {
+            color: #f1f5f9;
+        }
+
+        .dark-mode .return-modal-footer {
+            border-top-color: #1f2937;
+        }
+
+        .return-refund-details {
+            display: none;
+            margin-top: 0;
+            padding-top: 15px;
+            border-top: 1px solid #e0f2fe;
+            height: auto;
+        }
+
+        .selected .return-refund-details {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Return Steps */
+        .return-step {
+            display: none;
+        }
+
+        .return-step.active {
+            display: block;
+        }
+
+        .refund-source-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .source-card {
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: white;
+        }
+
+        .source-card:hover {
+            border-color: #3b82f6;
+            background: #f8fafc;
+        }
+
+        .source-card.active {
+            border-color: #3b82f6;
+            background: #eff6ff;
+            box-shadow: 0 0 0 1px #3b82f6;
+        }
+
+        .source-card i {
+            font-size: 1.5rem;
+            color: #64748b;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .source-card.active i {
+            color: #3b82f6;
+        }
+
+        .source-card span {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #475569;
+        }
+
+        .return-summary-card {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .summary-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .warning-alert {
+            background: #fffbeb;
+            border: 1px solid #fef3c7;
+            border-radius: 8px;
+            padding: 12px 16px;
+            color: #92400e;
+            font-size: 0.85rem;
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+        }
+
+        .dark-mode .source-card,
+        .dark-mode .return-summary-card {
+            background: #111827;
+            border-color: #1f2937;
+        }
+
+        .dark-mode .source-card:hover {
+            background: #1e293b;
+        }
+
+        .dark-mode .source-card.active {
+            background: #1e3a8a;
+        }
+
+        .dark-mode .source-card span {
+            color: #cbd5e1;
+        }
+
+        .dark-mode .summary-item {
+            border-bottom-color: #1f2937;
+        }
+
+        .dark-mode .warning-alert {
+            background: rgba(146, 64, 14, 0.1);
+            border-color: #92400e;
+            color: #fcd34d;
+        }
+
+        .dark-mode .dark-mode-text-white {
+            color: #f1f5f9 !important;
+        }
+
+        .return-input-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .return-input-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #64748b;
+            text-transform: uppercase;
+            width: 100px;
+        }
+
+        .return-input-wrapper {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            background: white;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .return-input-prefix {
+            background: #f8fafc;
+            padding: 5px 10px;
+            border-right: 1px solid #cbd5e1;
+            font-size: 0.85rem;
+            color: #64748b;
+        }
+
+        .return-input {
+            border: none;
+            padding: 5px 12px;
+            width: 100%;
+            font-weight: 700;
+            text-align: right;
+            outline: none;
+        }
+
+        .dark-mode .return-refund-details {
+            border-top-color: #334155;
+        }
+
+        .dark-mode .return-input-wrapper {
+            background: #1e293b;
+            border-color: #334155;
+        }
+
+        .dark-mode .return-input-prefix {
+            background: #334155;
+            border-right-color: #475569;
+            color: #94a3b8;
+        }
+
+        .dark-mode .return-input {
+            background: transparent;
+            color: white;
+        }
     </style>
 </head>
 
@@ -353,6 +677,88 @@
                     <button type="button" class="btn btn-primary px-4 fw-bold" onclick="window.print()">
                         <i class="bi bi-printer me-2"></i> Print
                     </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Process Return Modal -->
+    <div class="modal fade" id="returnModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 12px;">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold d-flex align-items-center gap-2">
+                        <i class="bi bi-arrow-counterclockwise text-primary"></i> Process Return
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="px-3 pt-1">
+                    <small class="text-muted" id="returnOrderNumber">Order #6f992d</small>
+                </div>
+                <div class="modal-body p-0">
+                    <!-- Step 1: Select Items -->
+                    <div class="return-step active" id="returnStep1">
+                        <div class="return-modal-content">
+                            <div class="return-info-alert">
+                                <i class="bi bi-info-circle-fill"></i>
+                                <div>Select items being returned. Adjust quantity and amount as needed.</div>
+                            </div>
+
+                            <div id="returnItemsList">
+                                <!-- Items will be populated by JS -->
+                            </div>
+                        </div>
+                        <div class="return-modal-footer bg-light" style="border-radius: 0 0 12px 12px;">
+                            <div class="fw-bold text-muted small" id="selectedCountText">Items selected: 0</div>
+                            <button type="button" class="btn btn-primary px-4 py-2 fw-bold d-flex align-items-center gap-2" id="btnNextReturn" disabled>
+                                Next <i class="bi bi-arrow-right"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Refund Source & Summary -->
+                    <div class="return-step" id="returnStep2">
+                        <div class="return-modal-content">
+                            <div class="mb-4">
+                                <h6 class="fw-bold text-muted mb-3 small">1. Select Refund Source</h6>
+                                <div class="refund-source-grid">
+                                    <div class="source-card active" data-source="Cash">
+                                        <i class="bi bi-cash-stack"></i>
+                                        <span>Cash</span>
+                                    </div>
+                                    <div class="source-card" data-source="E-Cash">
+                                        <i class="bi bi-phone"></i>
+                                        <span>E-Cash</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <h6 class="fw-bold text-muted mb-3 small">2. Review Summary</h6>
+                                <div class="return-summary-card">
+                                    <div id="summaryItemsList">
+                                        <!-- Summary items will be populated by JS -->
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-end mt-4">
+                                        <div>
+                                            <div class="fw-bold text-muted small text-uppercase">Final Refund Amount</div>
+                                            <div class="text-primary fw-bold small" id="summarySourceText">VIA CASH</div>
+                                        </div>
+                                        <div class="text-primary h3 fw-bold mb-0" id="finalRefundAmount">₱0.00</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="warning-alert">
+                                <i class="bi bi-exclamation-triangle-fill"></i>
+                                <div>This is a manual <strong id="warningSourceText">cash</strong> adjustment. Ensure the external transaction is completed before clicking confirm.</div>
+                            </div>
+                        </div>
+                        <div class="return-modal-footer bg-light" style="border-radius: 0 0 12px 12px;">
+                            <button type="button" class="btn btn-light px-4 py-2 fw-bold" id="btnBackReturn">Edit Items</button>
+                            <button type="button" class="btn btn-primary px-4 py-2 fw-bold" id="btnConfirmReturn">Process Return</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -473,6 +879,176 @@
                 </div>
             `;
         }
+
+        // --- Return Logic ---
+        const returnModal = new bootstrap.Modal(document.getElementById('returnModal'));
+        const returnItemsList = document.getElementById('returnItemsList');
+        const returnOrderNumberText = document.getElementById('returnOrderNumber');
+        const selectedCountText = document.getElementById('selectedCountText');
+        const btnNextReturn = document.getElementById('btnNextReturn');
+
+        document.addEventListener('click', function(e) {
+            const btn = e.target.closest('.btn-process-return');
+            if (btn) {
+                const orderData = JSON.parse(btn.getAttribute('data-order-json'));
+                renderReturnItems(orderData);
+                returnOrderNumberText.innerText = `Order ${orderData.order_number}`;
+                updateSelectedCount();
+                returnModal.show();
+            }
+        });
+
+        function renderReturnItems(order) {
+            let itemsHtml = '';
+            order.items.forEach(item => {
+                const productImg = item.product?.product_image 
+                    ? `{{ asset('images/products') }}/${item.product.product_image}` 
+                    : `{{ asset('assets/img/no-image.png') }}`;
+                
+                const unitPrice = parseFloat(item.total_price / item.quantity);
+                const showQtyInput = parseFloat(item.quantity) > 1;
+
+                itemsHtml += `
+                    <div class="return-item-card flex-column align-items-start p-3" data-item-id="${item.id}">
+                        <div class="d-flex align-items-center w-100 gap-3 mb-2">
+                            <img src="${productImg}" class="return-item-img" alt="Product" style="width: 60px; height: 60px;">
+                            <div class="return-item-details">
+                                <div class="return-item-name" style="font-size: 1.1rem; font-weight: 700;">${item.product?.product_name || 'Product'}</div>
+                                <div class="return-item-meta" style="font-size: 0.9rem;">Original Qty: ${parseFloat(item.quantity)} • ₱${unitPrice.toFixed(2)}/unit</div>
+                            </div>
+                            <div class="ms-auto return-checkbox-wrapper" style="width: 28px; height: 28px;">
+                                <i class="bi bi-check-lg" style="font-size: 1rem;"></i>
+                            </div>
+                        </div>
+
+                        <div class="return-refund-details w-100 mt-2 pt-3" style="border-top: 1px solid #e0f2fe;">
+                            ${showQtyInput ? `
+                            <div class="return-input-group justify-content-between">
+                                <div class="return-input-label" style="font-size: 0.85rem; color: #64748b;">RETURN QTY</div>
+                                <div class="return-input-wrapper" style="max-width: 200px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                                    <div class="return-input-prefix bg-white"><i class="bi bi-box-seam"></i></div>
+                                    <input type="number" class="return-input qty-input" value="${parseFloat(item.quantity)}" max="${parseFloat(item.quantity)}" step="any" data-unit-price="${unitPrice}">
+                                </div>
+                            </div>
+                            ` : ''}
+                            <div class="return-input-group justify-content-between">
+                                <div class="return-input-label" style="font-size: 0.85rem; color: #64748b;">REFUND AMT.</div>
+                                <div class="return-input-wrapper" style="max-width: 200px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                                    <div class="return-input-prefix bg-white"><span style="font-family: serif; font-weight: bold; color: #64748b;">₱</span></div>
+                                    <input type="number" class="return-input refund-input" value="${parseFloat(item.total_price).toFixed(2)}" step="0.01">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            returnItemsList.innerHTML = itemsHtml;
+
+            // Add click handlers to cards
+            const cards = returnItemsList.querySelectorAll('.return-item-card');
+            cards.forEach(card => {
+                card.addEventListener('click', function(e) {
+                    // Prevent toggling if clicking inside an input group
+                    if (e.target.closest('.return-input-group')) return;
+                    
+                    this.classList.toggle('selected');
+                    updateSelectedCount();
+                });
+            });
+
+            // Prevent card toggle when clicking inputs directly
+            const inputs = returnItemsList.querySelectorAll('.return-input');
+            inputs.forEach(input => {
+                input.addEventListener('click', (e) => e.stopPropagation());
+            });
+
+            // Auto-calculate refund when qty changes
+            const qtyInputs = returnItemsList.querySelectorAll('.qty-input');
+            qtyInputs.forEach(input => {
+                input.addEventListener('input', function() {
+                    const card = this.closest('.return-item-card');
+                    const refundInput = card.querySelector('.refund-input');
+                    const unitPrice = parseFloat(this.getAttribute('data-unit-price'));
+                    const qty = parseFloat(this.value) || 0;
+                    
+                    refundInput.value = (qty * unitPrice).toFixed(2);
+                });
+            });
+        }
+
+        function updateSelectedCount() {
+            const selectedCount = returnItemsList.querySelectorAll('.return-item-card.selected').length;
+            selectedCountText.innerText = `Items selected: ${selectedCount}`;
+            btnNextReturn.disabled = selectedCount === 0;
+        }
+
+        // --- Step Transitions ---
+        const btnNext = document.getElementById('btnNextReturn');
+        const btnBack = document.getElementById('btnBackReturn');
+        const step1 = document.getElementById('returnStep1');
+        const step2 = document.getElementById('returnStep2');
+
+        btnNext.addEventListener('click', () => {
+            populateSummary();
+            step1.classList.remove('active');
+            step2.classList.add('active');
+        });
+
+        btnBack.addEventListener('click', () => {
+            step2.classList.remove('active');
+            step1.classList.add('active');
+        });
+
+        // --- Refund Source Selection ---
+        const sourceCards = document.querySelectorAll('.source-card');
+        const summarySourceText = document.getElementById('summarySourceText');
+        const warningSourceText = document.getElementById('warningSourceText');
+
+        sourceCards.forEach(card => {
+            card.addEventListener('click', function() {
+                sourceCards.forEach(c => c.classList.remove('active'));
+                this.classList.add('active');
+                const source = this.getAttribute('data-source');
+                summarySourceText.innerText = `VIA ${source.toUpperCase()}`;
+                warningSourceText.innerText = source.toLowerCase();
+            });
+        });
+
+        function populateSummary() {
+            const selectedCards = returnItemsList.querySelectorAll('.return-item-card.selected');
+            const summaryList = document.getElementById('summaryItemsList');
+            const finalAmountEl = document.getElementById('finalRefundAmount');
+            
+            let html = '';
+            let totalRefund = 0;
+
+            selectedCards.forEach(card => {
+                const name = card.querySelector('.return-item-name').innerText;
+                const qty = card.querySelector('.qty-input')?.value || 1;
+                const refund = parseFloat(card.querySelector('.refund-input').value);
+                
+                totalRefund += refund;
+
+                html += `
+                    <div class="summary-item">
+                        <div>
+                            <div class="fw-bold text-dark dark-mode-text-white" style="font-size: 0.95rem;">${name}</div>
+                            <div class="text-muted small">QTY: ${qty}</div>
+                        </div>
+                        <div class="fw-bold">₱${refund.toFixed(2)}</div>
+                    </div>
+                `;
+            });
+
+            summaryList.innerHTML = html;
+            finalAmountEl.innerText = `₱${totalRefund.toFixed(2)}`;
+        }
+
+        // Reset steps when modal is closed
+        document.getElementById('returnModal').addEventListener('hidden.bs.modal', function () {
+            step2.classList.remove('active');
+            step1.classList.add('active');
+        });
     </script>
 </body>
 

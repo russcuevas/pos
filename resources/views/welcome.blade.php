@@ -153,15 +153,12 @@
             class="promo-img">🎁</div>
         <div class="promo-content">
             <span class="promo-badge">Special Offer</span>
-            <h2 class="promo-title">Wholesale Wednesday Deals!</h2>
+            <h2 class="promo-title">Wholesale Deals!</h2>
             <p class="hero-desc">Get exclusive discounts every Wednesday when you buy in bulk. Join our loyalty program
                 to unlock more rewards.</p>
             <ul class="promo-list">
                 <li><i class="bi bi-check-circle-fill"></i> Up to 20% off on bulk items</li>
-                <li><i class="bi bi-check-circle-fill"></i> Free delivery for orders above ₱500</li>
-                <li><i class="bi bi-check-circle-fill"></i> Points system for every purchase</li>
             </ul>
-            <a href="{{ route('customers.login.page') }}" class="btn-main btn-hero-primary">Claim Rewards</a>
         </div>
     </section>
 

@@ -41,7 +41,7 @@
                 <div class="order-item-row" style="border-top: 1px solid #f1f5f9; padding: 10px 0;">
                     <div class="item-info">
                         <span class="item-name" style="font-weight: 600; color: #2d3748;">
-                            {{ (int) $item->quantity }}x {{ $item->product->product_name ?? 'Product' }}
+                            {{ $item->quantity + 0 }}x {{ $item->product->product_name ?? 'Product' }}
                         </span>
                     </div>
                     <div class="text-end">
@@ -63,7 +63,8 @@
     @if (!$isCancelled)
         <div class="order-card-footer">
             <div class="d-flex gap-3">
-                <a href="javascript:void(0)" class="footer-link"
+                <a href="javascript:void(0)" class="footer-link btn-process-return"
+                    data-order-json="{{ json_encode($order) }}"
                     style="color: #ef4444; text-decoration: none; font-weight: 600; font-size: 0.85rem;">
                     <i class="bi bi-arrow-counterclockwise"></i> Return
                 </a>
