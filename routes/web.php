@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\admin\AdminAnalyticsController;
 use App\Http\Controllers\admin\AdminCashiersController;
 use App\Http\Controllers\admin\AdminOrdersController;
 use App\Http\Controllers\admin\AdminDashboardController;
@@ -63,6 +64,9 @@ Route::middleware(['admin'])->group(function () {
     Route::post('/admin/pos/cart/{id}/update', [AdminPOSController::class, 'AdminUpdateCart'])->name('admin.pos.cart.update');
     Route::delete('/admin/pos/cart/{id}/delete', [AdminPOSController::class, 'AdminDeleteCart'])->name('admin.pos.cart.delete');
     Route::post('/admin/pos/cart/checkout', [AdminPOSController::class, 'AdminCheckout'])->name('admin.pos.cart.checkout');
+
+    // ADMIN ANALYTICS
+    Route::get('/admin/analytics', [AdminAnalyticsController::class, 'AdminAnalyticsPage'])->name('admin.analytics.page');
 
     // ADMIN PRODUCTS
     Route::get('/admin/products', [AdminProductsController::class, 'AdminProductsPage'])->name('admin.products.page');

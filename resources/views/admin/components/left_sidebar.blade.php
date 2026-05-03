@@ -27,7 +27,7 @@
             <a class="nav-link {{ request()->is('admin/analytics*') ? 'active' : '' }}"
                 href="{{ url('/admin/analytics') }}">
                 <i class="bi bi-bar-chart-line nav-icon"></i>
-                <span>Analytics</span>
+                <span>Analytics & Reports</span>
             </a>
             <a class="nav-link {{ request()->is('admin/debtors*') ? 'active' : '' }}"
                 href="{{ url('/admin/debtors') }}">
