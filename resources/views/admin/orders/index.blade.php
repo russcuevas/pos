@@ -140,6 +140,10 @@
             border-top-color: #1f2937;
         }
 
+        .dark-mode .form-check-label {
+            color: #cbd5e1;
+        }
+
         .payment-summary-row {
             padding: 10px 24px;
             background: #fafafa;
@@ -697,7 +701,8 @@
                 </div>
                 <div class="modal-body p-0">
                     <!-- History Section -->
-                    <div id="returnHistorySection" class="p-3 bg-light border-bottom" style="display: none; max-height: 200px; overflow-y: auto;">
+                    <div id="returnHistorySection" class="p-3 bg-light border-bottom"
+                        style="display: none; max-height: 200px; overflow-y: auto;">
                         <h6 class="fw-bold text-muted mb-2 small d-flex align-items-center gap-2">
                             <i class="bi bi-clock-history"></i> Previous Return History
                         </h6>
@@ -720,7 +725,9 @@
                         </div>
                         <div class="return-modal-footer bg-light" style="border-radius: 0 0 12px 12px;">
                             <div class="fw-bold text-muted small" id="selectedCountText">Items selected: 0</div>
-                            <button type="button" class="btn btn-primary px-4 py-2 fw-bold d-flex align-items-center gap-2" id="btnNextReturn" disabled>
+                            <button type="button"
+                                class="btn btn-primary px-4 py-2 fw-bold d-flex align-items-center gap-2"
+                                id="btnNextReturn" disabled>
                                 Next <i class="bi bi-arrow-right"></i>
                             </button>
                         </div>
@@ -751,8 +758,10 @@
                                     </div>
                                     <div class="d-flex justify-content-between align-items-end mt-4">
                                         <div>
-                                            <div class="fw-bold text-muted small text-uppercase">Final Refund Amount</div>
-                                            <div class="text-primary fw-bold small" id="summarySourceText">VIA CASH</div>
+                                            <div class="fw-bold text-muted small text-uppercase">Final Refund Amount
+                                            </div>
+                                            <div class="text-primary fw-bold small" id="summarySourceText">VIA CASH
+                                            </div>
                                         </div>
                                         <div class="text-primary h3 fw-bold mb-0" id="finalRefundAmount">₱0.00</div>
                                     </div>
@@ -761,12 +770,15 @@
 
                             <div class="warning-alert">
                                 <i class="bi bi-exclamation-triangle-fill"></i>
-                                <div>This is a manual <strong id="warningSourceText">cash</strong> adjustment. Ensure the external transaction is completed before clicking confirm.</div>
+                                <div>This is a manual <strong id="warningSourceText">cash</strong> adjustment. Ensure
+                                    the external transaction is completed before clicking confirm.</div>
                             </div>
                         </div>
                         <div class="return-modal-footer bg-light" style="border-radius: 0 0 12px 12px;">
-                            <button type="button" class="btn btn-light px-4 py-2 fw-bold" id="btnBackReturn">Edit Items</button>
-                            <button type="button" class="btn btn-primary px-4 py-2 fw-bold" id="btnConfirmReturn">Process Return</button>
+                            <button type="button" class="btn btn-light px-4 py-2 fw-bold" id="btnBackReturn">Edit
+                                Items</button>
+                            <button type="button" class="btn btn-primary px-4 py-2 fw-bold"
+                                id="btnConfirmReturn">Process Return</button>
                         </div>
                     </div>
                 </div>
@@ -867,22 +879,22 @@
                         <span>₱${parseFloat(order.original_total + (parseFloat(order.discount_price) || 0)).toFixed(2)}</span>
                     </div>
                     ${order.discount_price > 0 ? `
-                        <div class="summary-row">
-                            <span style="color: #ef4444;">Discount</span>
-                            <span style="color: #ef4444;">-₱${parseFloat(order.discount_price).toFixed(2)}</span>
-                        </div>
-                        ` : ''}
+                            <div class="summary-row">
+                                <span style="color: #ef4444;">Discount</span>
+                                <span style="color: #ef4444;">-₱${parseFloat(order.discount_price).toFixed(2)}</span>
+                            </div>
+                            ` : ''}
 
                     ${order.total_refunded > 0 ? `
-                        <div class="summary-row fw-bold border-top pt-2 mt-2" style="border-top-style: dashed !important;">
-                            <span>Original Total</span>
-                            <span>₱${parseFloat(order.original_total).toFixed(2)}</span>
-                        </div>
-                        <div class="summary-row" style="color: #ef4444;">
-                            <span>Refunds</span>
-                            <span>-₱${parseFloat(order.total_refunded).toFixed(2)}</span>
-                        </div>
-                    ` : ''}
+                            <div class="summary-row fw-bold border-top pt-2 mt-2" style="border-top-style: dashed !important;">
+                                <span>Original Total</span>
+                                <span>₱${parseFloat(order.original_total).toFixed(2)}</span>
+                            </div>
+                            <div class="summary-row" style="color: #ef4444;">
+                                <span>Refunds</span>
+                                <span>-₱${parseFloat(order.total_refunded).toFixed(2)}</span>
+                            </div>
+                        ` : ''}
 
                     <div class="summary-row total">
                         <span>${order.total_refunded > 0 ? 'Net Total' : 'Total'}</span>
@@ -925,7 +937,7 @@
             // Handle History
             const historySection = document.getElementById('returnHistorySection');
             const historyList = document.getElementById('returnHistoryList');
-            
+
             if (order.returns && order.returns.length > 0) {
                 historySection.style.display = 'block';
                 let historyHtml = '';
@@ -933,7 +945,8 @@
                     const date = new Date(ret.created_at).toLocaleString();
                     let itemsDetail = '';
                     ret.items.forEach(item => {
-                        itemsDetail += `<li class="small">${parseFloat(item.quantity)}x ${item.order_item?.product?.product_name || 'Product'} <span class="text-danger">(-₱${parseFloat(item.refund_amount).toFixed(2)})</span></li>`;
+                        itemsDetail +=
+                            `<li class="small">${parseFloat(item.quantity)}x ${item.order_item?.product?.product_name || 'Product'} <span class="text-danger">(-₱${parseFloat(item.refund_amount).toFixed(2)})</span></li>`;
                     });
                     historyHtml += `
                         <div class="mb-2 pb-2 border-bottom last-child-border-0">
@@ -954,10 +967,10 @@
 
             let itemsHtml = '';
             order.items.forEach(item => {
-                const productImg = item.product?.product_image 
-                    ? `{{ asset('images/products') }}/${item.product.product_image}` 
-                    : `{{ asset('assets/img/no-image.png') }}`;
-                
+                const productImg = item.product?.product_image ?
+                    `{{ asset('images/products') }}/${item.product.product_image}` :
+                    `{{ asset('assets/img/no-image.png') }}`;
+
                 const unitPrice = parseFloat(item.total_price / item.quantity);
                 const returnedQty = parseFloat(item.returned_quantity || 0);
                 const remainingQty = parseFloat(item.quantity) - returnedQty;
@@ -978,25 +991,25 @@
                                 </div>
                             </div>
                             ${isFullyReturned ? `
-                                <div class="ms-auto"><span class="badge bg-secondary">Fully Returned</span></div>
-                            ` : `
-                                <div class="ms-auto return-checkbox-wrapper" style="width: 28px; height: 28px;">
-                                    <i class="bi bi-check-lg" style="font-size: 1rem;"></i>
-                                </div>
-                            `}
+                                    <div class="ms-auto"><span class="badge bg-secondary">Fully Returned</span></div>
+                                ` : `
+                                    <div class="ms-auto return-checkbox-wrapper" style="width: 28px; height: 28px;">
+                                        <i class="bi bi-check-lg" style="font-size: 1rem;"></i>
+                                    </div>
+                                `}
                         </div>
 
                         <div class="return-refund-details w-100 mt-2 pt-3" style="border-top: 1px solid #e0f2fe;">
                             @php $fractionalQtys = [0.25, 0.33, 0.5, 0.75]; @endphp
                             ${ (remainingQty > 1 && ![0.25, 0.33, 0.5, 0.75].includes(Math.round(remainingQty * 100) / 100)) ? `
-                            <div class="return-input-group justify-content-between">
-                                <div class="return-input-label" style="font-size: 0.85rem; color: #64748b;">RETURN QTY</div>
-                                <div class="return-input-wrapper" style="max-width: 200px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-                                    <div class="return-input-prefix bg-white"><i class="bi bi-box-seam"></i></div>
-                                    <input type="number" class="return-input qty-input" value="${remainingQty}" max="${remainingQty}" min="0.01" step="any" data-unit-price="${unitPrice}">
+                                <div class="return-input-group justify-content-between">
+                                    <div class="return-input-label" style="font-size: 0.85rem; color: #64748b;">RETURN QTY</div>
+                                    <div class="return-input-wrapper" style="max-width: 200px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                                        <div class="return-input-prefix bg-white"><i class="bi bi-box-seam"></i></div>
+                                        <input type="number" class="return-input qty-input" value="${remainingQty}" max="${remainingQty}" min="0.01" step="any" data-unit-price="${unitPrice}">
+                                    </div>
                                 </div>
-                            </div>
-                            ` : `<input type="hidden" class="qty-input" value="${remainingQty}" data-unit-price="${unitPrice}">` }
+                                ` : `<input type="hidden" class="qty-input" value="${remainingQty}" data-unit-price="${unitPrice}">` }
                             <div class="return-input-group justify-content-between">
                                 <div class="return-input-label" style="font-size: 0.85rem; color: #64748b;">REFUND AMT.</div>
                                 <div class="return-input-wrapper" style="max-width: 200px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
@@ -1029,7 +1042,7 @@
                     const unitPrice = parseFloat(this.getAttribute('data-unit-price'));
                     const maxQty = parseFloat(card.getAttribute('data-max-qty'));
                     let qty = parseFloat(this.value) || 0;
-                    
+
                     if (qty > maxQty) {
                         qty = maxQty;
                         this.value = maxQty;
@@ -1082,7 +1095,7 @@
             const selectedCards = returnItemsList.querySelectorAll('.return-item-card.selected');
             const summaryList = document.getElementById('summaryItemsList');
             const finalAmountEl = document.getElementById('finalRefundAmount');
-            
+
             let html = '';
             let totalRefund = 0;
 
@@ -1090,7 +1103,7 @@
                 const name = card.querySelector('.return-item-name').innerText;
                 const qty = card.querySelector('.qty-input')?.value || 1;
                 const refund = parseFloat(card.querySelector('.refund-input').value);
-                
+
                 totalRefund += refund;
 
                 html += `
@@ -1109,7 +1122,7 @@
         }
 
         // Reset steps when modal is closed
-        document.getElementById('returnModal').addEventListener('hidden.bs.modal', function () {
+        document.getElementById('returnModal').addEventListener('hidden.bs.modal', function() {
             step2.classList.remove('active');
             step1.classList.add('active');
         });
@@ -1125,7 +1138,7 @@
                 const id = card.getAttribute('data-item-id');
                 const qty = card.querySelector('.qty-input').value;
                 const refund = card.querySelector('.refund-input').value;
-                
+
                 totalRefund += parseFloat(refund);
                 items.push({
                     id: id,
@@ -1138,37 +1151,39 @@
             const orderNumber = returnOrderNumberText.innerText.replace('Order ', '');
 
             btnConfirmReturn.disabled = true;
-            btnConfirmReturn.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...`;
+            btnConfirmReturn.innerHTML =
+                `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...`;
 
-            fetch('{{ route("admin.orders.process_return") }}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                },
-                body: JSON.stringify({
-                    order_number: orderNumber,
-                    refund_source: source,
-                    refund_amount: totalRefund,
-                    items: items
+            fetch('{{ route('admin.orders.process_return') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute(
+                            'content')
+                    },
+                    body: JSON.stringify({
+                        order_number: orderNumber,
+                        refund_source: source,
+                        refund_amount: totalRefund,
+                        items: items
+                    })
                 })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    location.reload();
-                } else {
-                    alert('Error: ' + data.message);
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert('Error: ' + data.message);
+                        btnConfirmReturn.disabled = false;
+                        btnConfirmReturn.innerText = 'Process Return';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An unexpected error occurred.');
                     btnConfirmReturn.disabled = false;
                     btnConfirmReturn.innerText = 'Process Return';
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('An unexpected error occurred.');
-                btnConfirmReturn.disabled = false;
-                btnConfirmReturn.innerText = 'Process Return';
-            });
+                });
         });
     </script>
 </body>

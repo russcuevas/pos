@@ -2,11 +2,11 @@
 <div class="order-card {{ $isCancelled ? 'cancelled-order' : '' }}" id="order-card-{{ $order->order_number }}">
     <div class="order-card-header">
         <div>
-            <div class="customer-info" style="font-size: 0.9rem; color: #718096; font-weight: normal;">
+            <div class="customer-info" style="font-size: 0.9rem; font-weight: normal;">
                 {{ $order->customer_name ?: 'No name' }}
             </div>
             <div class="order-number" style="font-size: 1.1rem; font-weight: 800;">Order {{ $order->order_number }}</div>
-            <div class="order-date" style="color: #a0aec0; font-size: 0.8rem;">
+            <div class="order-date">
                 {{ $order->updated_at->format('n/j/Y, g:i:s A') }}</div>
         </div>
         <div class="text-end">
@@ -50,7 +50,7 @@
                 @php $isFullyReturned = $item->remaining_quantity <= 0; @endphp
                 <div class="order-item-row" style="border-top: 1px solid #f1f5f9; padding: 10px 0; {{ $isFullyReturned ? 'opacity: 0.6;' : '' }}">
                     <div class="item-info">
-                        <span class="item-name" style="font-weight: 600; color: #2d3748; {{ $isFullyReturned ? 'text-decoration: line-through;' : '' }}">
+                        <span class="item-name" style="font-weight: 600; {{ $isFullyReturned ? 'text-decoration: line-through;' : '' }}">
                             {{ $item->quantity + 0 }}x {{ $item->product->product_name ?? 'Product' }}
                         </span>
                         @if($item->returned_quantity > 0)
@@ -60,7 +60,7 @@
                         @endif
                     </div>
                     <div class="text-end">
-                        <div class="item-price" style="font-weight: 700; color: #2d3748; {{ $isFullyReturned ? 'text-decoration: line-through;' : '' }}">
+                        <div class="item-price" style="font-weight: 700; {{ $isFullyReturned ? 'text-decoration: line-through;' : '' }}">
                             ₱{{ number_format($item->total_price, 2) }}
                         </div>
                         @if (!$isCancelled)
