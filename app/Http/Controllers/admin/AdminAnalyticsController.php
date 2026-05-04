@@ -24,11 +24,11 @@ class AdminAnalyticsController extends Controller
 
         foreach ($ordersData as $item) {
             $supplierPrice = $item->product ? $item->product->supplier_price : 0;
-            
+
             // Calculate how much was actually KEPT (not returned)
             $returnedQty = $item->returnItems->sum('quantity');
             $activeQty = max(0, $item->quantity - $returnedQty);
-            
+
             // If item was fully or partially returned, total_price needs to be adjusted for the "active" part
             // total_price in DB is for the original quantity.
             $unitPrice = $item->quantity > 0 ? ($item->total_price / $item->quantity) : 0;
@@ -46,13 +46,13 @@ class AdminAnalyticsController extends Controller
         $activeOrderNumbers = array_unique($orderNumbersWithStock);
         $totalDiscount = $ordersData->whereIn('order_number', $activeOrderNumbers)
             ->groupBy('order_number')
-            ->map(function($items) {
+            ->map(function ($items) {
                 return $items->first()->discount_price ?? 0;
             })->sum();
 
         // 3. Final Metrics
         $totalSales = max(0, $grossSales - $totalDiscount);
-        $netProfit = max(0, $totalSales - $totalCost);
+        $netProfit = max(0, $totalCost - $totalDiscount);
         $salesCount = count($activeOrderNumbers);
         $avgSale = $salesCount > 0 ? ($totalSales / $salesCount) : 0;
 
@@ -68,12 +68,13 @@ class AdminAnalyticsController extends Controller
         foreach ($products as $product) {
             $qty = $product->quantity ?? 0;
             $potentialRevenue += ($qty * ($product->selling_price ?? 0));
-            $totalInventoryCost += ($qty * ($product->supplier_price ?? 0));
+            $costPrice = max(0, ($product->selling_price ?? 0) - ($product->supplier_price ?? 0));
+            $totalInventoryCost += ($qty * $costPrice);
         }
 
         // 6. Sales Trends Data (Current Month)
         $daysInMonth = now()->daysInMonth;
-        
+
         $admins = \App\Models\Admins::all();
         $cashiers = \App\Models\Cashiers::all();
 
@@ -82,8 +83,12 @@ class AdminAnalyticsController extends Controller
         ];
 
         // Initialize keys for each user
-        foreach ($admins as $admin) { $trendData['admin_' . $admin->id] = []; }
-        foreach ($cashiers as $cashier) { $trendData['cashier_' . $cashier->id] = []; }
+        foreach ($admins as $admin) {
+            $trendData['admin_' . $admin->id] = [];
+        }
+        foreach ($cashiers as $cashier) {
+            $trendData['cashier_' . $cashier->id] = [];
+        }
 
         for ($i = 1; $i <= $daysInMonth; $i++) {
             $date = now()->setDay($i)->format('Y-m-d');
@@ -111,20 +116,21 @@ class AdminAnalyticsController extends Controller
                 foreach ($orders as $order) {
                     $returnedQty = $order->returnItems->sum('quantity');
                     $activeQty = max(0, $order->quantity - $returnedQty);
-                    
+
                     if ($activeQty > 0) {
                         $sellingPrice = $order->total_price / $order->quantity;
-                        $itemCost = $order->product->supplier_price ?? 0;
-                        
+                        $unitProfit = $order->product->supplier_price ?? 0;
+                        $unitCost = max(0, $sellingPrice - $unitProfit);
+
                         $daySales += $sellingPrice * $activeQty;
-                        $dayProfit += ($sellingPrice - $itemCost) * $activeQty;
-                        $dayCost += $itemCost * $activeQty;
+                        $dayProfit += $unitProfit * $activeQty;
+                        $dayCost += $unitCost * $activeQty;
                     }
                 }
 
                 // Discounts for this day (based on unique orders)
                 $dayDiscount = $orders->groupBy('order_number')
-                    ->map(function($items) {
+                    ->map(function ($items) {
                         return $items->first()->discount_price ?? 0;
                     })->sum();
 
@@ -132,18 +138,25 @@ class AdminAnalyticsController extends Controller
                 $refundQuery = \App\Models\ReturnItems::whereBetween('created_at', [$start, $end]);
                 if (str_starts_with($type, 'admin_')) {
                     $id = str_replace('admin_', '', $type);
-                    $refundQuery->whereHas('orderItem', function($q) use ($id) { $q->where('admin_id', $id); });
+                    $refundQuery->whereHas('orderItem', function ($q) use ($id) {
+                        $q->where('admin_id', $id);
+                    });
                 } elseif (str_starts_with($type, 'cashier_')) {
                     $id = str_replace('cashier_', '', $type);
-                    $refundQuery->whereHas('orderItem', function($q) use ($id) { $q->where('cashier_id', $id); });
+                    $refundQuery->whereHas('orderItem', function ($q) use ($id) {
+                        $q->where('cashier_id', $id);
+                    });
                 }
                 $dayRefund = $refundQuery->sum('refund_amount');
+
+                $finalDaySales = max(0, $daySales - $dayDiscount);
+                $finalDayProfit = max(0, $dayProfit - $dayDiscount);
 
                 $trendData[$type][$i] = [
                     'date' => now()->setDay($i)->format('M d'),
                     'full_date' => now()->setDay($i)->format('l, M d'),
-                    'sales' => $daySales,
-                    'profit' => $dayProfit,
+                    'sales' => $finalDaySales,
+                    'profit' => $finalDayProfit,
                     'refunds' => $dayRefund,
                     'discount' => $dayDiscount,
                     'cost' => $dayCost
@@ -152,13 +165,15 @@ class AdminAnalyticsController extends Controller
         }
 
         return view('admin.analytics.index', compact(
-            'totalSales', 
-            'netProfit', 
-            'salesCount', 
-            'avgSale', 
+            'totalSales',
+            'netProfit',
+            'salesCount',
+            'avgSale',
             'totalRefund',
             'potentialRevenue',
             'totalInventoryCost',
+            'grossSales',
+            'totalCost',
             'trendData',
             'admins',
             'cashiers'

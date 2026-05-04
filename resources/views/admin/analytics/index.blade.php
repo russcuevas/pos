@@ -838,10 +838,27 @@
             display: flex;
             gap: 5px;
             white-space: nowrap;
+            flex-wrap: wrap;
+            justify-content: flex-start;
         }
 
         .dark-mode .trend-pills {
             background: #1f2937;
+        }
+
+        @media (max-width: 768px) {
+            .trend-header {
+                justify-content: flex-start;
+            }
+
+            .trend-pills {
+                gap: 8px;
+            }
+
+            .trend-select {
+                min-width: 140px;
+                max-width: 100%;
+            }
         }
 
         .trend-pill {
@@ -854,6 +871,36 @@
             transition: all 0.3s;
             border: none;
             background: transparent;
+        }
+
+        .trend-select {
+            padding: 8px 20px;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #64748b;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+            background: transparent;
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            outline: none;
+            min-width: 180px;
+        }
+
+        .trend-select.active,
+        .trend-select:focus {
+            background: white;
+            color: #0369a1;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .dark-mode .trend-select.active,
+        .dark-mode .trend-select:focus {
+            background: #374151;
+            color: #7dd3fc;
         }
 
         .trend-pill.active {
@@ -1194,11 +1241,14 @@
                         </button>
                     @endforeach
 
-                    @foreach ($cashiers as $cashier)
-                        <button class="trend-pill" data-type="cashier_{{ $cashier->id }}">
-                            Cashier: {{ $cashier->fullname }}
-                        </button>
-                    @endforeach
+                    @if ($cashiers->count())
+                        <select class="trend-select" id="cashierTrendSelect">
+                            <option value="" selected>Please select an Store</option>
+                            @foreach ($cashiers as $cashier)
+                                <option value="cashier_{{ $cashier->id }}">Cashier: {{ $cashier->fullname }}</option>
+                            @endforeach
+                        </select>
+                    @endif
                 </div>
             </div>
 
@@ -1247,14 +1297,20 @@
         <div class="valuation-grid">
             <div class="valuation-card card-revenue">
                 <div class="val-label">Potential Revenue (Selling Price)</div>
-                <div class="val-value text-revenue">₱{{ number_format($potentialRevenue, 2) }}</div>
-                <div class="val-desc">Total value if all current stock is sold</div>
+                <div class="val-value text-revenue">
+                    ₱{{ number_format($potentialRevenue, 2) }}
+                    <span style="font-size: 1.1rem; color: #ef4444;">- ₱{{ number_format($grossSales, 2) }}</span>
+                </div>
+                <div class="val-desc">Total value if all stock added is sold (not included the discount)</div>
             </div>
 
             <div class="valuation-card card-cost">
                 <div class="val-label">Total Inventory Cost</div>
-                <div class="val-value text-cost-val">₱{{ number_format($totalInventoryCost, 2) }}</div>
-                <div class="val-desc">Total cost invested in current stock</div>
+                <div class="val-value text-cost-val">
+                    ₱{{ number_format($totalInventoryCost, 2) }}
+                    <span style="font-size: 1.1rem; color: #ef4444;">- ₱{{ number_format($totalCost, 2) }}</span>
+                </div>
+                <div class="val-desc">Total cost invested in all stock added (not included the discount)</div>
             </div>
         </div>
     </div>
@@ -1349,14 +1405,31 @@
             document.getElementById('smCost').textContent = formatCurrency(data.cost);
         }
 
+        const cashierSelect = document.getElementById('cashierTrendSelect');
+
         document.querySelectorAll('.trend-pill').forEach(pill => {
             pill.addEventListener('click', () => {
-                document.querySelectorAll('.trend-pill').forEach(p => p.classList.remove('active'));
+                document.querySelectorAll('.trend-pill, .trend-select').forEach(p => p.classList.remove(
+                    'active'));
+                if (cashierSelect) {
+                    cashierSelect.selectedIndex = 0;
+                }
                 pill.classList.add('active');
                 currentType = pill.dataset.type;
                 updateChart(currentType);
             });
         });
+
+        if (cashierSelect) {
+            cashierSelect.addEventListener('change', () => {
+                document.querySelectorAll('.trend-pill, .trend-select').forEach(p => p.classList.remove('active'));
+                cashierSelect.classList.add('active');
+                currentType = cashierSelect.value;
+                if (currentType) {
+                    updateChart(currentType);
+                }
+            });
+        }
 
         // Initialize chart
         updateChart('all');
