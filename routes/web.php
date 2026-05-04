@@ -4,6 +4,7 @@ use App\Http\Controllers\admin\AdminAnalyticsController;
 use App\Http\Controllers\admin\AdminCashiersController;
 use App\Http\Controllers\admin\AdminOrdersController;
 use App\Http\Controllers\admin\AdminDashboardController;
+use App\Http\Controllers\admin\AdminFinanceController;
 use App\Http\Controllers\admin\AdminInventoryController;
 use App\Http\Controllers\admin\AdminPendingOrdersController;
 use App\Http\Controllers\admin\AdminPOSController;
@@ -96,6 +97,10 @@ Route::middleware(['admin'])->group(function () {
     // ADMIN ORDERS
     Route::get('/admin/orders', [AdminOrdersController::class, 'AdminOrdersPage'])->name('admin.orders.page');
     Route::post('/admin/orders/process-return', [AdminOrdersController::class, 'ProcessReturn'])->name('admin.orders.process_return');
+
+    // ADMIN FINANCE
+    Route::get('/admin/finance', [AdminFinanceController::class, 'AdminFinancePage'])->name('admin.finance.page');
+    Route::post('/admin/finance/add', [AdminFinanceController::class, 'AdminFinanceAdd'])->name('admin.finance.add');
 });
 
 
