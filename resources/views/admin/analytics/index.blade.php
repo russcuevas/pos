@@ -24,6 +24,11 @@
             scrollbar-width: thin;
         }
 
+        body.pos-page {
+            overflow-y: auto !important;
+            height: auto !important;
+        }
+
         .order-card {
             background: white;
             border-radius: 8px;
@@ -798,6 +803,229 @@
             color: #94a3b8;
         }
 
+        /* Sales Trends Styling */
+        .trend-container {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid #edf2f7;
+            padding: 30px;
+            margin-top: 20px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .dark-mode .trend-container {
+            background: #111827;
+            border-color: #1f2937;
+        }
+
+        .trend-header {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 40px;
+            overflow-x: auto;
+            scrollbar-width: none;
+            padding-bottom: 10px;
+        }
+
+        .trend-header::-webkit-scrollbar {
+            display: none;
+        }
+
+        .trend-pills {
+            background: #f1f5f9;
+            padding: 6px;
+            border-radius: 50px;
+            display: flex;
+            gap: 5px;
+            white-space: nowrap;
+        }
+
+        .dark-mode .trend-pills {
+            background: #1f2937;
+        }
+
+        .trend-pill {
+            padding: 8px 30px;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #64748b;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+            background: transparent;
+        }
+
+        .trend-pill.active {
+            background: white;
+            color: #0369a1;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .dark-mode .trend-pill.active {
+            background: #374151;
+            color: #7dd3fc;
+        }
+
+        .chart-wrapper {
+            height: 250px;
+            display: flex;
+            align-items: flex-end;
+            gap: 12px;
+            padding: 0 10px;
+            margin-bottom: 40px;
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+
+        .trend-column {
+            flex: 1;
+            min-width: 35px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .trend-bar-container {
+            width: 100%;
+            height: 0%;
+            background: #e2e8f0;
+            border-radius: 4px 4px 0 0;
+            position: relative;
+            transition: height 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+        }
+
+        .dark-mode .trend-bar-container {
+            background: #1f2937;
+        }
+
+        .trend-bar-profit {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #10b981;
+            transition: height 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 0.7;
+        }
+
+        .trend-column:hover .trend-bar-container {
+            background: #cbd5e1;
+        }
+
+        .trend-column.active .trend-bar-container {
+            background: #bae6fd;
+            box-shadow: 0 0 0 2px #0ea5e9;
+        }
+
+        .dark-mode .trend-column.active .trend-bar-container {
+            background: #0c4a6e;
+        }
+
+        .trend-date-label {
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: #94a3b8;
+            margin-top: 10px;
+        }
+
+        .trend-column.active .trend-date-label {
+            color: #0ea5e9;
+        }
+
+        /* Summary Bar Styling */
+        .trend-summary-bar {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .dark-mode .trend-summary-bar {
+            background: #1e293b;
+        }
+
+        .summary-period-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .period-label {
+            font-size: 0.7rem;
+            color: #94a3b8;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+
+        .period-date {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .dark-mode .period-date {
+            color: #f1f5f9;
+        }
+
+        .summary-metrics {
+            display: flex;
+            gap: 25px;
+            flex-wrap: wrap;
+        }
+
+        .summary-metric {
+            text-align: right;
+            min-width: 80px;
+        }
+
+        .sm-label {
+            font-size: 0.65rem;
+            font-weight: 800;
+            color: #64748b;
+            margin-bottom: 2px;
+        }
+
+        .sm-value {
+            font-size: 1.05rem;
+            font-weight: 800;
+        }
+
+        .sm-sales {
+            color: #0ea5e9;
+        }
+
+        .sm-profit {
+            color: #10b981;
+        }
+
+        .sm-refund {
+            color: #ef4444;
+        }
+
+        .sm-discount {
+            color: #a855f7;
+        }
+
+        .sm-debt {
+            color: #f97316;
+        }
+
+        .sm-cost {
+            color: #1e293b;
+        }
+
+        .dark-mode .sm-cost {
+            color: #cbd5e1;
+        }
+
         /* Responsive Adjustments */
         @media (max-width: 1200px) {
             .performance-card {
@@ -955,6 +1183,63 @@
             <h2 class="section-title">Sales Trends</h2>
         </div>
 
+        <div class="trend-container">
+            <div class="trend-header">
+                <div class="trend-pills">
+                    <button class="trend-pill active" data-type="all">All</button>
+
+                    @foreach ($admins as $admin)
+                        <button class="trend-pill" data-type="admin_{{ $admin->id }}">
+                            Admin: {{ $admin->fullname }}
+                        </button>
+                    @endforeach
+
+                    @foreach ($cashiers as $cashier)
+                        <button class="trend-pill" data-type="cashier_{{ $cashier->id }}">
+                            Cashier: {{ $cashier->fullname }}
+                        </button>
+                    @endforeach
+                </div>
+            </div>
+
+            <div class="chart-wrapper" id="trendChart">
+                <!-- Bars will be injected here by JS -->
+            </div>
+
+            <div class="trend-summary-bar">
+                <div class="summary-period-info">
+                    <div class="period-label">Selected Period</div>
+                    <div class="period-date" id="selectedDate">--</div>
+                </div>
+                <div class="summary-metrics">
+                    <div class="summary-metric">
+                        <div class="sm-label">SALES</div>
+                        <div class="sm-value sm-sales" id="smSales">₱0.00</div>
+                    </div>
+                    <div class="summary-metric">
+                        <div class="sm-label">PROFIT</div>
+                        <div class="sm-value sm-profit" id="smProfit">₱0.00</div>
+                    </div>
+                    <div class="summary-metric">
+                        <div class="sm-label">PAID DEBT</div>
+                        <div class="sm-value sm-debt" id="smDebt">₱0.00</div>
+                    </div>
+                    <div class="summary-metric">
+                        <div class="sm-label">REFUNDS</div>
+                        <div class="sm-value sm-refund" id="smRefund">₱0.00</div>
+                    </div>
+                    <div class="summary-metric">
+                        <div class="sm-label">DISCOUNT</div>
+                        <div class="sm-value sm-discount" id="smDiscount">₱0.00</div>
+                    </div>
+                    <div class="summary-metric">
+                        <div class="sm-label">COST</div>
+                        <div class="sm-value sm-cost" id="smCost">₱0.00</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="section-header" style="margin-top: 40px;">
             <h2 class="section-title">Inventory Valuation</h2>
         </div>
@@ -1001,6 +1286,80 @@
                 applyTheme(nextTheme);
             });
         }
+
+        // Sales Trends Logic
+        const trendData = @json($trendData);
+        let currentType = 'all';
+
+        function formatCurrency(value) {
+            return '₱' + new Intl.NumberFormat('en-PH', {
+                minimumFractionDigits: 2
+            }).format(value);
+        }
+
+        function updateChart(type) {
+            const chart = document.getElementById('trendChart');
+            const data = trendData[type];
+            chart.innerHTML = '';
+
+            // Find max sales for scaling
+            let maxSales = 0;
+            Object.values(data).forEach(d => {
+                if (d.sales > maxSales) maxSales = d.sales;
+            });
+            if (maxSales === 0) maxSales = 100; // Default scale
+
+            Object.keys(data).forEach(day => {
+                const dayData = data[day];
+                const height = (dayData.sales / maxSales) * 100;
+                const profitHeight = dayData.sales > 0 ? (dayData.profit / dayData.sales) * 100 : 0;
+
+                const column = document.createElement('div');
+                column.className = 'trend-column';
+                if (parseInt(day) === new Date().getDate()) column.classList.add('active');
+
+                column.innerHTML = `
+                    <div class="trend-bar-container" style="height: ${height}%">
+                        <div class="trend-bar-profit" style="height: ${profitHeight}%"></div>
+                    </div>
+                    <div class="trend-date-label">${dayData.date}</div>
+                `;
+
+                column.addEventListener('click', () => {
+                    document.querySelectorAll('.trend-column').forEach(c => c.classList.remove('active'));
+                    column.classList.add('active');
+                    showDaySummary(dayData);
+                });
+
+                chart.appendChild(column);
+
+                if (column.classList.contains('active')) {
+                    showDaySummary(dayData);
+                }
+            });
+        }
+
+        function showDaySummary(data) {
+            document.getElementById('selectedDate').textContent = data.full_date;
+            document.getElementById('smSales').textContent = formatCurrency(data.sales);
+            document.getElementById('smProfit').textContent = formatCurrency(data.profit);
+            document.getElementById('smRefund').textContent = formatCurrency(data.refunds);
+            document.getElementById('smDiscount').textContent = formatCurrency(data.discount || 0);
+            document.getElementById('smDebt').textContent = formatCurrency(0); // Static placeholder for now
+            document.getElementById('smCost').textContent = formatCurrency(data.cost);
+        }
+
+        document.querySelectorAll('.trend-pill').forEach(pill => {
+            pill.addEventListener('click', () => {
+                document.querySelectorAll('.trend-pill').forEach(p => p.classList.remove('active'));
+                pill.classList.add('active');
+                currentType = pill.dataset.type;
+                updateChart(currentType);
+            });
+        });
+
+        // Initialize chart
+        updateChart('all');
     </script>
 </body>
 

@@ -71,6 +71,86 @@ class AdminAnalyticsController extends Controller
             $totalInventoryCost += ($qty * ($product->supplier_price ?? 0));
         }
 
+        // 6. Sales Trends Data (Current Month)
+        $daysInMonth = now()->daysInMonth;
+        
+        $admins = \App\Models\Admins::all();
+        $cashiers = \App\Models\Cashiers::all();
+
+        $trendData = [
+            'all' => []
+        ];
+
+        // Initialize keys for each user
+        foreach ($admins as $admin) { $trendData['admin_' . $admin->id] = []; }
+        foreach ($cashiers as $cashier) { $trendData['cashier_' . $cashier->id] = []; }
+
+        for ($i = 1; $i <= $daysInMonth; $i++) {
+            $date = now()->setDay($i)->format('Y-m-d');
+            $start = $date . ' 00:00:00';
+            $end = $date . ' 23:59:59';
+
+            foreach (array_keys($trendData) as $type) {
+                $query = \App\Models\Orders::whereBetween('created_at', [$start, $end])
+                    ->where('order_status', 'completed')
+                    ->with(['product', 'returnItems']);
+
+                if (str_starts_with($type, 'admin_')) {
+                    $id = str_replace('admin_', '', $type);
+                    $query->where('admin_id', $id);
+                } elseif (str_starts_with($type, 'cashier_')) {
+                    $id = str_replace('cashier_', '', $type);
+                    $query->where('cashier_id', $id);
+                }
+
+                $orders = $query->get();
+                $daySales = 0;
+                $dayProfit = 0;
+                $dayCost = 0;
+
+                foreach ($orders as $order) {
+                    $returnedQty = $order->returnItems->sum('quantity');
+                    $activeQty = max(0, $order->quantity - $returnedQty);
+                    
+                    if ($activeQty > 0) {
+                        $sellingPrice = $order->total_price / $order->quantity;
+                        $itemCost = $order->product->supplier_price ?? 0;
+                        
+                        $daySales += $sellingPrice * $activeQty;
+                        $dayProfit += ($sellingPrice - $itemCost) * $activeQty;
+                        $dayCost += $itemCost * $activeQty;
+                    }
+                }
+
+                // Discounts for this day (based on unique orders)
+                $dayDiscount = $orders->groupBy('order_number')
+                    ->map(function($items) {
+                        return $items->first()->discount_price ?? 0;
+                    })->sum();
+
+                // Refunds for this day
+                $refundQuery = \App\Models\ReturnItems::whereBetween('created_at', [$start, $end]);
+                if (str_starts_with($type, 'admin_')) {
+                    $id = str_replace('admin_', '', $type);
+                    $refundQuery->whereHas('orderItem', function($q) use ($id) { $q->where('admin_id', $id); });
+                } elseif (str_starts_with($type, 'cashier_')) {
+                    $id = str_replace('cashier_', '', $type);
+                    $refundQuery->whereHas('orderItem', function($q) use ($id) { $q->where('cashier_id', $id); });
+                }
+                $dayRefund = $refundQuery->sum('refund_amount');
+
+                $trendData[$type][$i] = [
+                    'date' => now()->setDay($i)->format('M d'),
+                    'full_date' => now()->setDay($i)->format('l, M d'),
+                    'sales' => $daySales,
+                    'profit' => $dayProfit,
+                    'refunds' => $dayRefund,
+                    'discount' => $dayDiscount,
+                    'cost' => $dayCost
+                ];
+            }
+        }
+
         return view('admin.analytics.index', compact(
             'totalSales', 
             'netProfit', 
@@ -78,7 +158,10 @@ class AdminAnalyticsController extends Controller
             'avgSale', 
             'totalRefund',
             'potentialRevenue',
-            'totalInventoryCost'
+            'totalInventoryCost',
+            'trendData',
+            'admins',
+            'cashiers'
         ));
     }
 }
