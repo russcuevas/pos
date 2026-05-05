@@ -4,6 +4,7 @@ use App\Http\Controllers\admin\AdminAnalyticsController;
 use App\Http\Controllers\admin\AdminCashiersController;
 use App\Http\Controllers\admin\AdminOrdersController;
 use App\Http\Controllers\admin\AdminDashboardController;
+use App\Http\Controllers\admin\AdminDebtorsController;
 use App\Http\Controllers\admin\AdminFinanceController;
 use App\Http\Controllers\admin\AdminInventoryController;
 use App\Http\Controllers\admin\AdminPendingOrdersController;
@@ -101,6 +102,14 @@ Route::middleware(['admin'])->group(function () {
     // ADMIN FINANCE
     Route::get('/admin/finance', [AdminFinanceController::class, 'AdminFinancePage'])->name('admin.finance.page');
     Route::post('/admin/finance/add', [AdminFinanceController::class, 'AdminFinanceAdd'])->name('admin.finance.add');
+
+    // ADMIN DEBTORS
+    Route::get('/admin/debtors', [AdminDebtorsController::class, 'AdminDebtorsPage'])->name('admin.debtors.page');
+    Route::post('/admin/debtors/create', [AdminDebtorsController::class, 'AdminDebtorsCreate'])->name('admin.debtors.create');
+    Route::get('/admin/debtors/{id}/view', [AdminDebtorsController::class, 'AdminDebtorsView'])->name('admin.debtors.view');
+    Route::post('/admin/debtors/{id}/add-batch', [AdminDebtorsController::class, 'AdminDebtorsAddBatch'])->name('admin.debtors.add_batch');
+    Route::post('/admin/debtors/{id}/add-payment', [AdminDebtorsController::class, 'AdminDebtorsAddPayment'])->name('admin.debtors.add_payment');
+    Route::delete('/admin/debtors/{id}/delete', [AdminDebtorsController::class, 'AdminDebtorsDelete'])->name('admin.debtors.delete');
 });
 
 

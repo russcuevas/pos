@@ -654,8 +654,12 @@
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
             padding: 25px;
             display: grid;
-            grid-template-columns: repeat(5, 1fr);
+            grid-template-columns: repeat(4, 1fr);
             gap: 20px;
+        }
+
+        .performance-card.debt-grid {
+            grid-template-columns: repeat(5, 1fr);
         }
 
         .dark-mode .performance-card {
@@ -726,6 +730,26 @@
 
         .text-refund {
             color: #ef4444;
+        }
+
+        .text-debt-outstanding {
+            color: #475569;
+        }
+
+        .text-debt-added {
+            color: #f97316;
+        }
+
+        .text-debt-payment {
+            color: #059669;
+        }
+
+        .text-debt-profit {
+            color: #10b981;
+        }
+
+        .text-debt-avg {
+            color: #8b5cf6;
         }
 
         /* Inventory Valuation Styling */
@@ -1216,13 +1240,51 @@
                 </div>
                 <div class="metric-value">₱{{ number_format($avgSale, 2) }}</div>
             </div>
+        </div>
+
+        <div class="section-header" style="margin-top: 40px">
+            <h2 class="section-title">This Month's Debt Overview</h2>
+        </div>
+
+        <div class="performance-card debt-grid">
+            <div class="metric-item">
+                <div class="metric-label">
+                    <i class="bi bi-people text-danger metric-icon"></i>
+                    TOTAL OUTSTANDING
+                </div>
+                <div class="metric-value">₱{{ number_format($totalOutstandingDebt, 2) }}</div>
+            </div>
 
             <div class="metric-item">
                 <div class="metric-label">
-                    <i class="bi bi-arrow-counterclockwise text-refund metric-icon"></i>
-                    TOTAL REFUND
+                    <i class="bi bi-arrow-up-right text-debt-added metric-icon"></i>
+                    NET DEBT ADDED
                 </div>
-                <div class="metric-value text-refund">₱{{ number_format($totalRefund, 2) }}</div>
+                <div class="metric-value">₱{{ number_format($netDebtAdded, 2) }}</div>
+            </div>
+
+            <div class="metric-item">
+                <div class="metric-label">
+                    <i class="bi bi-arrow-down-left text-debt-payment metric-icon"></i>
+                    PAYMENTS RECEIVED
+                </div>
+                <div class="metric-value text-debt-payment">₱{{ number_format($debtPaymentsReceived, 2) }}</div>
+            </div>
+
+            <div class="metric-item">
+                <div class="metric-label">
+                    <i class="bi bi-wallet2 text-debt-profit metric-icon"></i>
+                    NET PROFIT
+                </div>
+                <div class="metric-value text-debt-profit">₱{{ number_format($debtProfit, 2) }}</div>
+            </div>
+
+            <div class="metric-item">
+                <div class="metric-label">
+                    <i class="bi bi-pie-chart text-debt-avg metric-icon"></i>
+                    AVG. DEBT SALE
+                </div>
+                <div class="metric-value text-debt-avg">₱{{ number_format($avgDebtSale, 2) }}</div>
             </div>
         </div>
 
@@ -1245,7 +1307,8 @@
                         <select class="trend-select" id="cashierTrendSelect">
                             <option value="" selected>Please select an Store</option>
                             @foreach ($cashiers as $cashier)
-                                <option value="cashier_{{ $cashier->id }}">Cashier: {{ $cashier->fullname }}</option>
+                                <option value="cashier_{{ $cashier->id }}">Cashier: {{ $cashier->fullname }}
+                                </option>
                             @endforeach
                         </select>
                     @endif
@@ -1290,6 +1353,7 @@
             </div>
         </div>
 
+
         <div class="section-header" style="margin-top: 40px;">
             <h2 class="section-title">Inventory Valuation</h2>
         </div>
@@ -1299,7 +1363,7 @@
                 <div class="val-label">Potential Revenue (Selling Price)</div>
                 <div class="val-value text-revenue">
                     ₱{{ number_format($potentialRevenue, 2) }}
-                    <span style="font-size: 1.1rem; color: #ef4444;">- ₱{{ number_format($grossSales, 2) }}</span>
+                    <span style="font-size: 1.1rem; color: #ef4444;">- ₱{{ number_format($realizedRevenue, 2) }}</span>
                 </div>
                 <div class="val-desc">Total value if all stock added is sold (not included the discount)</div>
             </div>
@@ -1308,7 +1372,7 @@
                 <div class="val-label">Total Inventory Cost</div>
                 <div class="val-value text-cost-val">
                     ₱{{ number_format($totalInventoryCost, 2) }}
-                    <span style="font-size: 1.1rem; color: #ef4444;">- ₱{{ number_format($totalCost, 2) }}</span>
+                    <span style="font-size: 1.1rem; color: #ef4444;">- ₱{{ number_format($realizedCost, 2) }}</span>
                 </div>
                 <div class="val-desc">Total cost invested in all stock added (not included the discount)</div>
             </div>
@@ -1401,7 +1465,7 @@
             document.getElementById('smProfit').textContent = formatCurrency(data.profit);
             document.getElementById('smRefund').textContent = formatCurrency(data.refunds);
             document.getElementById('smDiscount').textContent = formatCurrency(data.discount || 0);
-            document.getElementById('smDebt').textContent = formatCurrency(0); // Static placeholder for now
+            document.getElementById('smDebt').textContent = formatCurrency(data.paid_debt || 0);
             document.getElementById('smCost').textContent = formatCurrency(data.cost);
         }
 
