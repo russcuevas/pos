@@ -59,7 +59,17 @@
                                                             $name = $item->product_id
                                                                 ? $item->product_name
                                                                 : $item->custom_entry;
-                                                            $subtotal = $price * $item->quantity;
+                                                            
+                                                            $subtotal = 0;
+                                                            $isWholesale = false;
+                                                            if ($item->product_id && !empty($item->whole_sale_qty) && $item->whole_sale_qty > 0 && $item->quantity >= $item->whole_sale_qty) {
+                                                                $wholesale_bundles = floor($item->quantity / $item->whole_sale_qty);
+                                                                $regular_items = fmod($item->quantity, $item->whole_sale_qty);
+                                                                $subtotal = ($wholesale_bundles * $item->whole_sale_price) + ($regular_items * $item->selling_price);
+                                                                $isWholesale = true;
+                                                            } else {
+                                                                $subtotal = $price * $item->quantity;
+                                                            }
                                                             $orderTotal += $subtotal;
                                                         @endphp
                                                         <tr>
@@ -74,7 +84,11 @@
                                                                             style="width: 32px; height: 32px; background: #e2e8f0; border-radius: 4px; display: flex; align-items: center; justify-content: center;">
                                                                             📦</div>
                                                                     @endif
-                                                                    <span>{{ $name }}</span>
+                                                                    <span>{{ $name }}
+                                                                        @if ($isWholesale)
+                                                                            <br><small class="badge bg-success mt-1" style="font-size: 0.65em; padding: 2px 4px;">Wholesale Applied</small>
+                                                                        @endif
+                                                                    </span>
                                                                 </div>
                                                             </td>
                                                             <td class="text-end">₱{{ number_format($price, 2) }}

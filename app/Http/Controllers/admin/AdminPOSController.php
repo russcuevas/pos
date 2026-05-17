@@ -55,7 +55,7 @@ class AdminPOSController extends Controller
 
         $savedOrdersData = SaveOrders::where('admin_id', $admin_id)
             ->leftJoin('products', 'save_orders.product_id', '=', 'products.id')
-            ->select('save_orders.*', 'products.product_name', 'products.product_image', 'products.selling_price')
+            ->select('save_orders.*', 'products.product_name', 'products.product_image', 'products.selling_price', 'products.whole_sale_qty', 'products.whole_sale_price')
             ->orderBy('save_orders.created_at', 'desc')
             ->get();
 
