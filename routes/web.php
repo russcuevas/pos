@@ -14,6 +14,9 @@ use App\Http\Controllers\auth\AuthController;
 use App\Http\Controllers\customers\CustomersHomeController;
 use App\Http\Controllers\customers\CustomersCartController;
 use App\Http\Controllers\customers\CustomersOrderController;
+use App\Http\Controllers\cashier\CashierPOSController;
+use App\Http\Controllers\cashier\CashierOrdersController;
+use App\Http\Controllers\cashier\CashierPendingOrdersController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -36,6 +39,11 @@ Route::get('/', function () {
 Route::get('/admin/login', [AuthController::class, 'AdminLoginPage'])->name('admin.login.page');
 Route::post('/admin/login/request', [AuthController::class, 'AdminLoginRequest'])->name('admin.login.request');
 Route::post('/admin/logout', [AuthController::class, 'AdminLogout'])->name('admin.logout');
+
+// CASHIER AUTH
+Route::get('/cashier/login', [AuthController::class, 'CashierLoginPage'])->name('cashier.login.page');
+Route::post('/cashier/login/request', [AuthController::class, 'CashierLoginRequest'])->name('cashier.login.request');
+Route::post('/cashier/logout', [AuthController::class, 'CashierLogout'])->name('cashier.logout');
 
 // CUSTOMER AUTH
 Route::get('/customers/login', [AuthController::class, 'CustomerLoginPage'])->name('customers.login.page');
@@ -131,4 +139,35 @@ Route::middleware(['customer'])->group(function () {
     Route::get('customers/orders/messages/{order_number}', [CustomersOrderController::class, 'GetMessages'])->name('customers.orders.get_messages');
     Route::post('customers/orders/add-item', [CustomersOrderController::class, 'AddOrderItem'])->name('customers.orders.add_item');
     Route::get('customers/orders/status', [CustomersOrderController::class, 'GetOrdersStatus'])->name('customers.orders.get_status');
+});
+
+// CASHIER ROUTES
+Route::middleware(['cashier'])->group(function () {
+    // CASHIER POS
+    Route::get('/cashier/pos', [CashierPOSController::class, 'CashierPOSPage'])->name('cashier.pos.page');
+    Route::post('/cashier/pos/cart/add', [CashierPOSController::class, 'CashierAddToCart'])->name('cashier.pos.cart.add');
+    Route::post('/cashier/pos/cart/custom', [CashierPOSController::class, 'CashierAddCustomCart'])->name('cashier.pos.cart.custom');
+    Route::post('/cashier/pos/cart/save', [CashierPOSController::class, 'CashierSaveOrder'])->name('cashier.pos.cart.save');
+    Route::post('/cashier/pos/saved-order/{reference}/load', [CashierPOSController::class, 'CashierLoadSavedOrder'])->name('cashier.pos.saved.load');
+    Route::delete('/cashier/pos/saved-order/{reference}/delete', [CashierPOSController::class, 'CashierDeleteSavedOrder'])->name('cashier.pos.saved.delete');
+    Route::post('/cashier/pos/cart/{id}/update', [CashierPOSController::class, 'CashierUpdateCart'])->name('cashier.pos.cart.update');
+    Route::delete('/cashier/pos/cart/{id}/delete', [CashierPOSController::class, 'CashierDeleteCart'])->name('cashier.pos.cart.delete');
+    Route::post('/cashier/pos/cart/checkout', [CashierPOSController::class, 'CashierCheckout'])->name('cashier.pos.cart.checkout');
+
+    // CASHIER ORDERS
+    Route::get('/cashier/orders', [CashierOrdersController::class, 'CashierOrdersPage'])->name('cashier.orders.page');
+    Route::post('/cashier/orders/process-return', [CashierOrdersController::class, 'ProcessReturn'])->name('cashier.orders.process_return');
+
+    // CASHIER PENDING ORDERS
+    Route::get('/cashier/pending_orders', [CashierPendingOrdersController::class, 'CashierPendingOrdersPage'])->name('cashier.pending_orders.page');
+    Route::post('/cashier/pending_orders/update-quantity', [CashierPendingOrdersController::class, 'UpdateOrderQuantity'])->name('cashier.pending_orders.update_qty');
+    Route::post('/cashier/pending_orders/add-item', [CashierPendingOrdersController::class, 'AddOrderItem'])->name('cashier.pending_orders.add_item');
+    Route::post('/cashier/pending_orders/send-chat', [CashierPendingOrdersController::class, 'SendChat'])->name('cashier.pending_orders.send_chat');
+    Route::get('/cashier/pending_orders/messages/{order_number}', [CashierPendingOrdersController::class, 'GetMessages'])->name('cashier.pending_orders.get_messages');
+    Route::post('/cashier/pending_orders/cancel', [CashierPendingOrdersController::class, 'CancelOrder'])->name('cashier.pending_orders.cancel');
+    Route::post('/cashier/pending_orders/start-preparing', [CashierPendingOrdersController::class, 'StartPreparing'])->name('cashier.pending_orders.start_preparing');
+    Route::post('/cashier/pending_orders/mark-ready', [CashierPendingOrdersController::class, 'MarkAsReady'])->name('cashier.pending_orders.mark_ready');
+    Route::get('/cashier/pending_orders/check', [CashierPendingOrdersController::class, 'CheckNewOrders'])->name('cashier.pending_orders.check');
+    Route::get('/cashier/pending_orders/fetch-card/{order_number}', [CashierPendingOrdersController::class, 'FetchOrderCard'])->name('cashier.pending_orders.fetch_card');
+    Route::post('/cashier/pending_orders/checkout', [CashierPendingOrdersController::class, 'CheckoutOrder'])->name('cashier.pending_orders.checkout');
 });

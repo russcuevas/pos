@@ -42,6 +42,34 @@ class AuthController extends Controller
 
     // END ADMIN AUTH
 
+    // CASHIER AUTH
+    public function CashierLoginPage()
+    {
+        return view('auth.cashier.login');
+    }
+
+    public function CashierLoginRequest(Request $request)
+    {
+        $credentials = $request->validate([
+            'email' => 'required|email',
+            'password' => 'required',
+        ]);
+
+        if (Auth::guard('cashier')->attempt($credentials)) {
+            return redirect()->route('cashier.pos.page')->with('success', 'Successfully login');
+        }
+        return redirect()->back()->withInput($request->only('email'))->with('error', 'Invalid credentials');
+    }
+
+    public function CashierLogout(Request $request)
+    {
+        Auth::guard('cashier')->logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+        return redirect()->route('cashier.login.page')->with('success', 'Successfully logout');
+    }
+    // END CASHIER AUTH
+
     // CUSTOMER AUTH
     public function CustomerLoginPage()
     {
