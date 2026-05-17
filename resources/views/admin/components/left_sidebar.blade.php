@@ -67,11 +67,6 @@
                 <i class="bi bi-cash-stack nav-icon"></i>
                 <span>Finance</span>
             </a>
-            <a class="nav-link {{ request()->is('admin/settings*') ? 'active' : '' }}"
-                href="{{ url('/admin/settings') }}">
-                <i class="bi bi-person-gear nav-icon"></i>
-                <span>Setting</span>
-            </a>
         </nav>
 
     </div>

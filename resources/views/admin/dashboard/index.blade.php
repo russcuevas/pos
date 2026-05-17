@@ -37,11 +37,14 @@
                 <div class="stat-card">
                     <div class="stat-icon cobalt"><i class="bi bi-cart-check"></i></div>
                     <div class="stat-body">
-                        <div class="stat-value">&#8369;100</div>
+                        <div class="stat-value">&#8369;{{ number_format($todayStats['sales'], 2) }}</div>
                         <div class="stat-label">Sales Today</div>
                     </div>
                     <div class="stat-trend">
-                        <span class="trend-badge trend-up"><i class="bi bi-arrow-up-short"></i>2</span>
+                        <span class="trend-badge {{ $salesTrend >= 0 ? 'trend-up' : 'trend-down' }}">
+                            <i class="bi {{ $salesTrend >= 0 ? 'bi-arrow-up-short' : 'bi-arrow-down-short' }}"></i>
+                            &#8369;{{ number_format(abs($salesTrend), 2) }}
+                        </span>
                         <span class="trend-period">vs yesterday</span>
                     </div>
                 </div>
@@ -50,11 +53,14 @@
                 <div class="stat-card">
                     <div class="stat-icon purple"><i class="bi bi-graph-up-arrow"></i></div>
                     <div class="stat-body">
-                        <div class="stat-value">&#8369;100</div>
+                        <div class="stat-value">&#8369;{{ number_format($todayStats['profit'], 2) }}</div>
                         <div class="stat-label">Profit Today</div>
                     </div>
                     <div class="stat-trend">
-                        <span class="trend-badge trend-up"><i class="bi bi-arrow-up-short"></i>5</span>
+                        <span class="trend-badge {{ $profitTrend >= 0 ? 'trend-up' : 'trend-down' }}">
+                            <i class="bi {{ $profitTrend >= 0 ? 'bi-arrow-up-short' : 'bi-arrow-down-short' }}"></i>
+                            &#8369;{{ number_format(abs($profitTrend), 2) }}
+                        </span>
                         <span class="trend-period">vs yesterday</span>
                     </div>
                 </div>
@@ -63,11 +69,11 @@
                 <div class="stat-card">
                     <div class="stat-icon green"><i class="bi bi-wallet2"></i></div>
                     <div class="stat-body">
-                        <div class="stat-value">2</div>
+                        <div class="stat-value">&#8369;{{ number_format($debtPaidToday, 2) }}</div>
                         <div class="stat-label">Debt Paid Today</div>
                     </div>
                     <div class="stat-trend">
-                        <span class="trend-badge trend-up"><i class="bi bi-arrow-up-short"></i>8%</span>
+                        <span class="trend-badge trend-up"><i class="bi bi-arrow-up-short"></i>{{ $debtPaidTrendPercent }}%</span>
                         <span class="trend-period">this month</span>
                     </div>
                 </div>
@@ -76,12 +82,12 @@
                 <div class="stat-card">
                     <div class="stat-icon amber"><i class="bi bi-box-seam"></i></div>
                     <div class="stat-body">
-                        <div class="stat-value">15</div>
+                        <div class="stat-value">{{ number_format($totalProducts) }}</div>
                         <div class="stat-label">Total Products</div>
                     </div>
                     <div class="stat-trend">
-                        <span class="trend-badge trend-up"><i class="bi bi-arrow-up-short"></i>12%</span>
-                        <span class="trend-period">this month</span>
+                        <span class="trend-badge trend-up"><i class="bi bi-arrow-up-short"></i>{{ $productsAddedTrendPercent }}%</span>
+                        <span class="trend-period">added this month</span>
                     </div>
                 </div>
             </div>

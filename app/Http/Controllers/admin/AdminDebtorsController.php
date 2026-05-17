@@ -152,7 +152,7 @@ class AdminDebtorsController extends Controller
                 if (!empty($item['products_id'])) {
                     $product = Products::findOrFail($item['products_id']);
                     $price = $product->selling_price;
-                    
+
                     // Decrement product quantity
                     $product->decrement('quantity', $item['quantity']);
                 } else {
