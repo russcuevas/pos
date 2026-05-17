@@ -153,6 +153,8 @@ Route::middleware(['cashier'])->group(function () {
     Route::post('/cashier/pos/cart/{id}/update', [CashierPOSController::class, 'CashierUpdateCart'])->name('cashier.pos.cart.update');
     Route::delete('/cashier/pos/cart/{id}/delete', [CashierPOSController::class, 'CashierDeleteCart'])->name('cashier.pos.cart.delete');
     Route::post('/cashier/pos/cart/checkout', [CashierPOSController::class, 'CashierCheckout'])->name('cashier.pos.cart.checkout');
+    Route::post('/cashier/pos/start-shift', [CashierPOSController::class, 'StartShift'])->name('cashier.pos.start_shift');
+    Route::post('/cashier/pos/edit-petty-cash', [CashierPOSController::class, 'EditPettyCash'])->name('cashier.pos.edit_petty_cash');
 
     // CASHIER ORDERS
     Route::get('/cashier/orders', [CashierOrdersController::class, 'CashierOrdersPage'])->name('cashier.orders.page');

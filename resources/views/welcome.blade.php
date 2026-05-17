@@ -33,7 +33,7 @@
             <a href="{{ route('customers.login.page') }}" class="btn-login btn-customer">
                 <i class="bi bi-person-fill"></i> Customer Login
             </a>
-            <a href="#" class="btn-login btn-cashier">
+            <a href="{{ route('cashier.login.page') }}" class="btn-login btn-cashier">
                 <i class="bi bi-calculator-fill"></i> Cashier Login
             </a>
             <a href="{{ route('admin.login.page') }}" class="btn-login btn-admin">

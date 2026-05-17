@@ -9,6 +9,8 @@ use App\Models\Products;
 use App\Models\CashiersCarts;
 use App\Models\Orders;
 use App\Models\SaveOrders;
+use App\Models\PettyCash;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 
 class CashierPOSController extends Controller
@@ -66,7 +68,63 @@ class CashierPOSController extends Controller
             ->distinct('order_number')
             ->count('order_number');
 
-        return view('cashier.pos.index', compact('products', 'cartItems', 'subtotal', 'profit', 'savedOrders', 'pending_count'));
+        $pettyCash = PettyCash::where('cashier_id', $cashier_id)
+            ->whereDate('opening_time', Carbon::today())
+            ->first();
+
+        $salesToday = 0;
+        $walkInSales = 0;
+        $onlineSales = 0;
+        if ($pettyCash) {
+            $baseQuery = Orders::where('cashier_id', $cashier_id)
+                ->where('order_status', 'Completed')
+                ->whereDate('created_at', Carbon::today());
+
+            $salesToday = $baseQuery->sum('total_price');
+            $walkInSales = (clone $baseQuery)->where('order_type', 'Walk In')->sum('total_price');
+            $onlineSales = (clone $baseQuery)->where('order_type', '!=', 'Walk In')->sum('total_price');
+        }
+
+        return view('cashier.pos.index', compact('products', 'cartItems', 'subtotal', 'profit', 'savedOrders', 'pending_count', 'pettyCash', 'salesToday', 'walkInSales', 'onlineSales'));
+    }
+
+    public function StartShift(Request $request)
+    {
+        $request->validate([
+            'beginning_balance' => 'required|numeric|min:0'
+        ]);
+
+        $cashier_id = Auth::guard('cashier')->id();
+
+        PettyCash::create([
+            'cashier_id' => $cashier_id,
+            'beginning_balance' => $request->beginning_balance,
+            'opening_time' => Carbon::now(),
+        ]);
+
+        return back()->with('success', 'Shift started successfully!');
+    }
+
+    public function EditPettyCash(Request $request)
+    {
+        $request->validate([
+            'beginning_balance' => 'required|numeric|min:0'
+        ]);
+
+        $cashier_id = Auth::guard('cashier')->id();
+
+        $pettyCash = PettyCash::where('cashier_id', $cashier_id)
+            ->whereDate('opening_time', Carbon::today())
+            ->first();
+
+        if ($pettyCash) {
+            $pettyCash->update([
+                'beginning_balance' => $request->beginning_balance
+            ]);
+            return back()->with('success', 'Petty Cash updated successfully!');
+        }
+
+        return back()->with('error', 'Petty Cash record not found for today.');
     }
 
     public function CashierAddToCart(Request $request)

@@ -97,13 +97,17 @@
                         <i class="bi bi-printer"></i>
                     </a>
                     <div class="admin-chip"><i class="bi bi-shield-check"></i>
-                        {{ strtoupper(Auth::guard('cashier')->user()->fullname) }}</div>
-                    <form action="{{ route('cashier.logout') }}" method="POST">
-                        @csrf
-                        <button type="submit" class="nav-icon-pill border-0 bg-transparent" style="color: white;">
-                            <i class="bi bi-box-arrow-right"></i>
-                        </button>
-                    </form>
+                        {{ strtoupper(Auth::guard('cashier')->user()->fullname) }}
+                    </div>
+                    <div class="admin-chip">
+                        ₱
+                        {{ $pettyCash ? number_format($pettyCash->beginning_balance, 2) : '0.00' }}
+                    </div>
+                    <button type="button" data-bs-toggle="modal" data-bs-target="#shiftModal"
+                        class="nav-icon-pill border-0 bg-transparent" style="color: white;" title="View Shift / Logout">
+                        <i class="bi bi-grid-3x2-gap-fill"></i>
+
+                    </button>
                 </div>
             </div>
         </div>
@@ -313,6 +317,7 @@
     <script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+    @include('cashier.pos.modals.shift')
     @include('cashier.pos.modals.saved_item')
     @include('cashier.pos.modals.quantity')
     @include('cashier.pos.modals.checkout')
@@ -337,6 +342,18 @@
         });
 
         document.addEventListener('DOMContentLoaded', () => {
+            // Auto-show Shift Modal if Petty Cash hasn't been set for today
+            @if (!$pettyCash)
+                const shiftModalElement = document.getElementById('shiftModal');
+                if (shiftModalElement) {
+                    const shiftModal = new bootstrap.Modal(shiftModalElement, {
+                        backdrop: 'static',
+                        keyboard: false
+                    });
+                    shiftModal.show();
+                }
+            @endif
+
             @if (session('success'))
                 notyf.success("{!! addslashes(session('success')) !!}");
             @endif
