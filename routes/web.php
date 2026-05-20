@@ -66,6 +66,7 @@ Route::middleware(['admin'])->group(function () {
 
     // ADMIN POS
     Route::get('/admin/pos', [AdminPOSController::class, 'AdminPOSPage'])->name('admin.pos.page');
+    Route::post('/admin/pos/cart/scan', [AdminPOSController::class, 'AdminScanBarcode'])->name('admin.pos.cart.scan');
     Route::post('/admin/pos/cart/add', [AdminPOSController::class, 'AdminAddToCart'])->name('admin.pos.cart.add');
     Route::post('/admin/pos/cart/custom', [AdminPOSController::class, 'AdminAddCustomCart'])->name('admin.pos.cart.custom');
     Route::post('/admin/pos/cart/save', [AdminPOSController::class, 'AdminSaveOrder'])->name('admin.pos.cart.save');
@@ -145,6 +146,7 @@ Route::middleware(['customer'])->group(function () {
 Route::middleware(['cashier'])->group(function () {
     // CASHIER POS
     Route::get('/cashier/pos', [CashierPOSController::class, 'CashierPOSPage'])->name('cashier.pos.page');
+    Route::post('/cashier/pos/cart/scan', [CashierPOSController::class, 'CashierScanBarcode'])->name('cashier.pos.cart.scan');
     Route::post('/cashier/pos/cart/add', [CashierPOSController::class, 'CashierAddToCart'])->name('cashier.pos.cart.add');
     Route::post('/cashier/pos/cart/custom', [CashierPOSController::class, 'CashierAddCustomCart'])->name('cashier.pos.cart.custom');
     Route::post('/cashier/pos/cart/save', [CashierPOSController::class, 'CashierSaveOrder'])->name('cashier.pos.cart.save');

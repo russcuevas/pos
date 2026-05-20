@@ -879,22 +879,22 @@
                         <span>₱${parseFloat(order.original_total + (parseFloat(order.discount_price) || 0)).toFixed(2)}</span>
                     </div>
                     ${order.discount_price > 0 ? `
-                            <div class="summary-row">
-                                <span style="color: #ef4444;">Discount</span>
-                                <span style="color: #ef4444;">-₱${parseFloat(order.discount_price).toFixed(2)}</span>
-                            </div>
-                            ` : ''}
+                                <div class="summary-row">
+                                    <span style="color: #ef4444;">Discount</span>
+                                    <span style="color: #ef4444;">-₱${parseFloat(order.discount_price).toFixed(2)}</span>
+                                </div>
+                                ` : ''}
 
                     ${order.total_refunded > 0 ? `
-                            <div class="summary-row fw-bold border-top pt-2 mt-2" style="border-top-style: dashed !important;">
-                                <span>Original Total</span>
-                                <span>₱${parseFloat(order.original_total).toFixed(2)}</span>
-                            </div>
-                            <div class="summary-row" style="color: #ef4444;">
-                                <span>Refunds</span>
-                                <span>-₱${parseFloat(order.total_refunded).toFixed(2)}</span>
-                            </div>
-                        ` : ''}
+                                <div class="summary-row fw-bold border-top pt-2 mt-2" style="border-top-style: dashed !important;">
+                                    <span>Original Total</span>
+                                    <span>₱${parseFloat(order.original_total).toFixed(2)}</span>
+                                </div>
+                                <div class="summary-row" style="color: #ef4444;">
+                                    <span>Refunds</span>
+                                    <span>-₱${parseFloat(order.total_refunded).toFixed(2)}</span>
+                                </div>
+                            ` : ''}
 
                     <div class="summary-row total">
                         <span>${order.total_refunded > 0 ? 'Net Total' : 'Total'}</span>
@@ -991,25 +991,25 @@
                                 </div>
                             </div>
                             ${isFullyReturned ? `
-                                    <div class="ms-auto"><span class="badge bg-secondary">Fully Returned</span></div>
-                                ` : `
-                                    <div class="ms-auto return-checkbox-wrapper" style="width: 28px; height: 28px;">
-                                        <i class="bi bi-check-lg" style="font-size: 1rem;"></i>
-                                    </div>
-                                `}
+                                        <div class="ms-auto"><span class="badge bg-secondary">Fully Returned</span></div>
+                                    ` : `
+                                        <div class="ms-auto return-checkbox-wrapper" style="width: 28px; height: 28px;">
+                                            <i class="bi bi-check-lg" style="font-size: 1rem;"></i>
+                                        </div>
+                                    `}
                         </div>
 
                         <div class="return-refund-details w-100 mt-2 pt-3" style="border-top: 1px solid #e0f2fe;">
                             @php $fractionalQtys = [0.25, 0.33, 0.5, 0.75]; @endphp
                             ${ (remainingQty > 1 && ![0.25, 0.33, 0.5, 0.75].includes(Math.round(remainingQty * 100) / 100)) ? `
-                                <div class="return-input-group justify-content-between">
-                                    <div class="return-input-label" style="font-size: 0.85rem; color: #64748b;">RETURN QTY</div>
-                                    <div class="return-input-wrapper" style="max-width: 200px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-                                        <div class="return-input-prefix bg-white"><i class="bi bi-box-seam"></i></div>
-                                        <input type="number" class="return-input qty-input" value="${remainingQty}" max="${remainingQty}" min="0.01" step="any" data-unit-price="${unitPrice}">
+                                    <div class="return-input-group justify-content-between">
+                                        <div class="return-input-label" style="font-size: 0.85rem; color: #64748b;">RETURN QTY</div>
+                                        <div class="return-input-wrapper" style="max-width: 200px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                                            <div class="return-input-prefix bg-white"><i class="bi bi-box-seam"></i></div>
+                                            <input type="number" class="return-input qty-input" value="${remainingQty}" max="${remainingQty}" min="0.01" step="any" data-unit-price="${unitPrice}">
+                                        </div>
                                     </div>
-                                </div>
-                                ` : `<input type="hidden" class="qty-input" value="${remainingQty}" data-unit-price="${unitPrice}">` }
+                                    ` : `<input type="hidden" class="qty-input" value="${remainingQty}" data-unit-price="${unitPrice}">` }
                             <div class="return-input-group justify-content-between">
                                 <div class="return-input-label" style="font-size: 0.85rem; color: #64748b;">REFUND AMT.</div>
                                 <div class="return-input-wrapper" style="max-width: 200px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">

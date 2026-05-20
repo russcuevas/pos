@@ -54,7 +54,7 @@ class CashierPOSController extends Controller
             $subtotal += $line_total;
         }
 
-        $profit = $total_cost; 
+        $profit = $total_cost;
 
         $savedOrdersData = SaveOrders::where('cashier_id', $cashier_id)
             ->leftJoin('products', 'save_orders.product_id', '=', 'products.id')
@@ -153,6 +153,40 @@ class CashierPOSController extends Controller
         }
 
         return redirect()->back()->with('success', 'Added to cart successfully');
+    }
+
+    public function CashierScanBarcode(Request $request)
+    {
+        $request->validate([
+            'barcode' => 'required|string'
+        ]);
+
+        $barcode = trim($request->barcode);
+        $product = Products::where('product_code', $barcode)->first();
+
+        if (!$product) {
+            return back()->with('error', 'No product found');
+        }
+
+        $cashier_id = Auth::guard('cashier')->id();
+
+        $cartItem = CashiersCarts::where('product_id', $product->id)
+            ->where('cashier_id', $cashier_id)
+            ->first();
+
+        if ($cartItem) {
+            $cartItem->quantity += 1;
+            $cartItem->save();
+        } else {
+            CashiersCarts::create([
+                'admin_id' => null,
+                'cashier_id' => $cashier_id,
+                'product_id' => $product->id,
+                'quantity' => 1,
+            ]);
+        }
+
+        return back()->with('success', 'Added: ' . $product->product_name);
     }
 
     public function CashierUpdateCart(Request $request, $id)

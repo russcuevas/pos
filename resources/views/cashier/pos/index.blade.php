@@ -59,6 +59,8 @@
 
 <body class="pos-page">
 
+    <div id="sessionMessages" class="d-none" data-success="{{ session('success') }}" data-error="{{ session('error') }}"></div>
+
     <!-- ════════════════════════════
      TOP NAV
 ════════════════════════════ -->
@@ -126,6 +128,12 @@
                 <i class="bi bi-search si"></i>
                 <input type="text" placeholder="Search Product...">
             </div>
+
+            <!-- Hidden Barcode Scanner Form -->
+            <form id="barcodeScanForm" action="{{ route('cashier.pos.cart.scan') }}" method="POST" class="d-none">
+                @csrf
+                <input type="hidden" name="barcode" id="barcodeInput">
+            </form>
 
             <!-- Alpha Filter (CSS-only radio) -->
             <div class="alpha-row">
@@ -392,6 +400,39 @@
             }
             alphaRadios.forEach(radio => radio.addEventListener('change', filterProducts));
 
+            // Global Barcode Scanner Listener
+            let barcodeBuffer = '';
+            let barcodeTimeout = null;
+
+            document.addEventListener('keypress', function(e) {
+                const activeTag = document.activeElement ? document.activeElement.tagName.toLowerCase() : '';
+                // Don't intercept if user is typing normally in an input/textarea
+                if (activeTag === 'input' || activeTag === 'textarea' || activeTag === 'select') {
+                    return; 
+                }
+
+                if (e.key === 'Enter') {
+                    if (barcodeBuffer.length > 3) {
+                        let scanForm = document.getElementById('barcodeScanForm');
+                        if (scanForm) {
+                            scanForm.querySelector('input[name="barcode"]').value = barcodeBuffer;
+                            scanForm.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+                        }
+                    }
+                    barcodeBuffer = '';
+                    return;
+                }
+
+                if (e.key.length === 1) {
+                    barcodeBuffer += e.key;
+                    
+                    clearTimeout(barcodeTimeout);
+                    barcodeTimeout = setTimeout(() => {
+                        barcodeBuffer = '';
+                    }, 100); // Reset if typing is slower than a scanner (approx 100ms per char)
+                }
+            });
+
             // Quantity Modal Logic
             const qtyModal = document.getElementById('qtyModal');
             if (qtyModal) {
@@ -558,7 +599,7 @@
 
             // AJAX Cart Handling
             document.body.addEventListener('submit', function(e) {
-                if (e.target.matches('.pcard-form') || e.target.closest('.order-list form')) {
+                if (e.target.matches('.pcard-form') || e.target.closest('.order-list form') || e.target.matches('#barcodeScanForm')) {
                     e.preventDefault();
                     const form = e.target;
 
@@ -660,6 +701,21 @@
                                         window.calculateChange();
                                     }
                                 }
+                            }
+
+                            if (e.target.matches('#barcodeScanForm')) {
+                                const barcodeInput = e.target.querySelector('input[name="barcode"]');
+                                if (barcodeInput) {
+                                    barcodeInput.value = '';
+                                }
+                            }
+
+                            const newSessionMessages = doc.querySelector('#sessionMessages');
+                            if (newSessionMessages) {
+                                const successMsg = newSessionMessages.getAttribute('data-success');
+                                const errorMsg = newSessionMessages.getAttribute('data-error');
+                                if (successMsg) notyf.success(successMsg);
+                                if (errorMsg) notyf.error(errorMsg);
                             }
 
                             if (btn) {

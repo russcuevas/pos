@@ -59,6 +59,9 @@
 
 <body class="pos-page">
 
+    <div id="sessionMessages" class="d-none" data-success="{{ session('success') }}"
+        data-error="{{ session('error') }}"></div>
+
     <!-- ════════════════════════════
      TOP NAV
 ════════════════════════════ -->
@@ -83,7 +86,7 @@
                 <a href="{{ route('admin.orders.page') }}" class="nav-pill"><i class="bi bi-list-ul"></i> Orders</a>
                 <a href="{{ route('admin.pending_orders.page') }}" class="nav-pill">
                     <i class="bi bi-hourglass-split"></i> Pending
-                    @if(isset($pending_count) && $pending_count > 0)
+                    @if (isset($pending_count) && $pending_count > 0)
                         <span class="nav-badge">{{ $pending_count }}</span>
                     @endif
                 </a>
@@ -123,8 +126,15 @@
                 <input type="text" placeholder="Search Product...">
             </div>
 
+            <!-- Hidden Barcode Scanner Form -->
+            <form id="barcodeScanForm" action="{{ route('admin.pos.cart.scan') }}" method="POST" class="d-none">
+                @csrf
+                <input type="hidden" name="barcode" id="barcodeInput">
+            </form>
+
             <!-- Alpha Filter (CSS-only radio) -->
-            <div class="alpha-row">
+            <div class="alpha-row">4800131291683
+
                 <input type="radio" name="alpha" id="a-all" checked>
                 <label class="alpha-lbl" for="a-all">All</label>
 
@@ -387,6 +397,43 @@
             }
             alphaRadios.forEach(radio => radio.addEventListener('change', filterProducts));
 
+            // Global Barcode Scanner Listener
+            let barcodeBuffer = '';
+            let barcodeTimeout = null;
+
+            document.addEventListener('keypress', function(e) {
+                const activeTag = document.activeElement ? document.activeElement.tagName.toLowerCase() :
+                '';
+                // Don't intercept if user is typing normally in an input/textarea
+                if (activeTag === 'input' || activeTag === 'textarea' || activeTag === 'select') {
+                    return;
+                }
+
+                if (e.key === 'Enter') {
+                    if (barcodeBuffer.length > 3) {
+                        let scanForm = document.getElementById('barcodeScanForm');
+                        if (scanForm) {
+                            scanForm.querySelector('input[name="barcode"]').value = barcodeBuffer;
+                            scanForm.dispatchEvent(new Event('submit', {
+                                cancelable: true,
+                                bubbles: true
+                            }));
+                        }
+                    }
+                    barcodeBuffer = '';
+                    return;
+                }
+
+                if (e.key.length === 1) {
+                    barcodeBuffer += e.key;
+
+                    clearTimeout(barcodeTimeout);
+                    barcodeTimeout = setTimeout(() => {
+                        barcodeBuffer = '';
+                    }, 100); // Reset if typing is slower than a scanner (approx 100ms per char)
+                }
+            });
+
             // Quantity Modal Logic
             const qtyModal = document.getElementById('qtyModal');
             if (qtyModal) {
@@ -553,112 +600,138 @@
 
             // AJAX Cart Handling
             document.body.addEventListener('submit', function(e) {
-                if (e.target.matches('.pcard-form') || e.target.closest('.order-list form')) {
+                if (e.target.matches('.pcard-form') || e.target.closest('.order-list form') || e.target
+                    .matches('#barcodeScanForm')) {
                     e.preventDefault();
                     const form = e.target;
-                    
+
                     const btn = form.querySelector('button[type="submit"], button.btn-add');
                     const originalContent = btn ? btn.innerHTML : '';
                     if (btn) {
-                        btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
+                        btn.innerHTML =
+                            '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
                         btn.disabled = true;
                     }
 
                     const formData = new FormData(form);
-                    
+
                     const actionUrl = form.getAttribute('action') || window.location.href;
                     const formMethod = form.getAttribute('method') || 'POST';
-                    
+
                     fetch(actionUrl, {
-                        method: formMethod,
-                        body: formData,
-                        headers: {
-                            'X-Requested-With': 'XMLHttpRequest',
-                            'Accept': 'text/html'
-                        }
-                    })
-                    .then(response => response.text())
-                    .then(html => {
-                        const parser = new DOMParser();
-                        const doc = parser.parseFromString(html, 'text/html');
-                        
-                        // Update Order List
-                        const newOrderList = doc.querySelector('.order-list');
-                        if (newOrderList) document.querySelector('.order-list').innerHTML = newOrderList.innerHTML;
-                        
-                        // Update Total
-                        const newTotalVal = doc.querySelector('.order-total-bar .total-val');
-                        if (newTotalVal) document.querySelector('.order-total-bar .total-val').innerHTML = newTotalVal.innerHTML;
-
-                        // Update Profit
-                        const newProfitValue = doc.querySelector('#profitValue');
-                        const currentProfitValue = document.querySelector('#profitValue');
-                        if (newProfitValue && currentProfitValue) {
-                            const isHidden = currentProfitValue.classList.contains('d-none');
-                            currentProfitValue.innerHTML = newProfitValue.innerHTML;
-                            currentProfitValue.className = newProfitValue.className;
-                            if (isHidden) currentProfitValue.classList.add('d-none');
-                            else currentProfitValue.classList.remove('d-none');
-                        }
-                        
-                        // Update Check Out Button
-                        const newCheckoutBtn = doc.querySelector('.btn-checkout');
-                        if (newCheckoutBtn) {
-                            const currentCheckoutBtn = document.querySelector('.btn-checkout');
-                            if (currentCheckoutBtn) {
-                                currentCheckoutBtn.disabled = newCheckoutBtn.disabled;
-                                // Also update the icon and text to match the server side
-                                currentCheckoutBtn.innerHTML = newCheckoutBtn.innerHTML;
+                            method: formMethod,
+                            body: formData,
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest',
+                                'Accept': 'text/html'
                             }
-                        }
-                        
-                        // Update Bottom Actions
-                        const newBottomActions = doc.querySelector('.bottom-actions');
-                        if (newBottomActions) document.querySelector('.bottom-actions').innerHTML = newBottomActions.innerHTML;
-                        
-                        // Update Cart Badge
-                        const newBadge = doc.querySelector('.cart-fab-badge');
-                        if (newBadge) {
-                            const currentBadge = document.querySelector('.cart-fab-badge');
-                            if (currentBadge) currentBadge.innerHTML = newBadge.innerHTML;
-                        }
-                        
-                        // Update Base Total for Checkout
-                        if (newTotalVal) {
-                            const rawNewSubtotal = parseFloat(newTotalVal.textContent.replace(/[^0-9.-]+/g,""));
-                            if (!isNaN(rawNewSubtotal)) {
-                                baseTotal = rawNewSubtotal;
-                                
-                                const discount = parseFloat(document.querySelector('input[name="discount_price"]')?.value) || 0;
-                                const newTotal = Math.max(0, baseTotal - discount);
-                                
-                                const checkoutTotalInput = document.getElementById('checkoutTotalInput');
-                                const checkoutTotalDisplay = document.getElementById('checkoutTotalDisplay');
-                                const paymentAmountInput = document.getElementById('paymentAmountInput');
-                                
-                                if (checkoutTotalInput) checkoutTotalInput.value = newTotal;
-                                if (checkoutTotalDisplay) checkoutTotalDisplay.textContent = '₱' + newTotal.toFixed(2);
-                                if (paymentAmountInput) {
-                                    paymentAmountInput.value = Math.ceil(newTotal);
-                                }
-                                if (typeof window.calculateChange === 'function') {
-                                    window.calculateChange();
+                        })
+                        .then(response => response.text())
+                        .then(html => {
+                            const parser = new DOMParser();
+                            const doc = parser.parseFromString(html, 'text/html');
+
+                            // Update Order List
+                            const newOrderList = doc.querySelector('.order-list');
+                            if (newOrderList) document.querySelector('.order-list').innerHTML =
+                                newOrderList.innerHTML;
+
+                            // Update Total
+                            const newTotalVal = doc.querySelector('.order-total-bar .total-val');
+                            if (newTotalVal) document.querySelector('.order-total-bar .total-val')
+                                .innerHTML = newTotalVal.innerHTML;
+
+                            // Update Profit
+                            const newProfitValue = doc.querySelector('#profitValue');
+                            const currentProfitValue = document.querySelector('#profitValue');
+                            if (newProfitValue && currentProfitValue) {
+                                const isHidden = currentProfitValue.classList.contains('d-none');
+                                currentProfitValue.innerHTML = newProfitValue.innerHTML;
+                                currentProfitValue.className = newProfitValue.className;
+                                if (isHidden) currentProfitValue.classList.add('d-none');
+                                else currentProfitValue.classList.remove('d-none');
+                            }
+
+                            // Update Check Out Button
+                            const newCheckoutBtn = doc.querySelector('.btn-checkout');
+                            if (newCheckoutBtn) {
+                                const currentCheckoutBtn = document.querySelector('.btn-checkout');
+                                if (currentCheckoutBtn) {
+                                    currentCheckoutBtn.disabled = newCheckoutBtn.disabled;
+                                    // Also update the icon and text to match the server side
+                                    currentCheckoutBtn.innerHTML = newCheckoutBtn.innerHTML;
                                 }
                             }
-                        }
 
-                        if (btn) {
-                            btn.innerHTML = originalContent;
-                            btn.disabled = false;
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error updating cart:', error);
-                        if (btn) {
-                            btn.innerHTML = originalContent;
-                            btn.disabled = false;
-                        }
-                    });
+                            // Update Bottom Actions
+                            const newBottomActions = doc.querySelector('.bottom-actions');
+                            if (newBottomActions) document.querySelector('.bottom-actions').innerHTML =
+                                newBottomActions.innerHTML;
+
+                            // Update Cart Badge
+                            const newBadge = doc.querySelector('.cart-fab-badge');
+                            if (newBadge) {
+                                const currentBadge = document.querySelector('.cart-fab-badge');
+                                if (currentBadge) currentBadge.innerHTML = newBadge.innerHTML;
+                            }
+
+                            // Update Base Total for Checkout
+                            if (newTotalVal) {
+                                const rawNewSubtotal = parseFloat(newTotalVal.textContent.replace(
+                                    /[^0-9.-]+/g, ""));
+                                if (!isNaN(rawNewSubtotal)) {
+                                    baseTotal = rawNewSubtotal;
+
+                                    const discount = parseFloat(document.querySelector(
+                                        'input[name="discount_price"]')?.value) || 0;
+                                    const newTotal = Math.max(0, baseTotal - discount);
+
+                                    const checkoutTotalInput = document.getElementById(
+                                        'checkoutTotalInput');
+                                    const checkoutTotalDisplay = document.getElementById(
+                                        'checkoutTotalDisplay');
+                                    const paymentAmountInput = document.getElementById(
+                                        'paymentAmountInput');
+
+                                    if (checkoutTotalInput) checkoutTotalInput.value = newTotal;
+                                    if (checkoutTotalDisplay) checkoutTotalDisplay.textContent = '₱' +
+                                        newTotal.toFixed(2);
+                                    if (paymentAmountInput) {
+                                        paymentAmountInput.value = Math.ceil(newTotal);
+                                    }
+                                    if (typeof window.calculateChange === 'function') {
+                                        window.calculateChange();
+                                    }
+                                }
+                            }
+
+                            if (e.target.matches('#barcodeScanForm')) {
+                                const barcodeInput = e.target.querySelector('input[name="barcode"]');
+                                if (barcodeInput) {
+                                    barcodeInput.value = '';
+                                }
+                            }
+
+                            const newSessionMessages = doc.querySelector('#sessionMessages');
+                            if (newSessionMessages) {
+                                const successMsg = newSessionMessages.getAttribute('data-success');
+                                const errorMsg = newSessionMessages.getAttribute('data-error');
+                                if (successMsg) notyf.success(successMsg);
+                                if (errorMsg) notyf.error(errorMsg);
+                            }
+
+                            if (btn) {
+                                btn.innerHTML = originalContent;
+                                btn.disabled = false;
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error updating cart:', error);
+                            if (btn) {
+                                btn.innerHTML = originalContent;
+                                btn.disabled = false;
+                            }
+                        });
                 }
             });
         });
