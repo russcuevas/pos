@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>POS System - Cashier Login</title>
+    <title>POS System</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
@@ -24,7 +24,8 @@
                 <img src="{{ asset('image/logo.png') }}" alt="POS Logo"
                     style="max-height: 80px; margin-bottom: 2rem; filter: brightness(0) invert(1);">
                 <h1>Cashier Portal.</h1>
-                <p>Process sales efficiently, manage customer transactions securely, and maintain smooth store operations.</p>
+                <p>Process sales efficiently, manage customer transactions securely, and maintain smooth store
+                    operations.</p>
             </div>
         </div>
 
