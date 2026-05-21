@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>POS System</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
@@ -296,7 +297,6 @@
                     <i class="bi bi-bag-check"></i> Checkout
                 </button>
                 <div class="bottom-actions">
-                    <button class="bot-btn cam"><i class="bi bi-camera"></i> Camera</button>
                     <button class="bot-btn cust" data-bs-toggle="modal" data-bs-target="#customItemModal"><i
                             class="bi bi-plus-circle"></i> Custom</button>
                     @if ($cartItems->isEmpty())
@@ -571,6 +571,125 @@
             }
 
             // Save Order logic (Event Delegation)
+            const checkoutForm = document.getElementById('checkoutForm');
+            if (checkoutForm) {
+                checkoutForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+
+                    const submitBtn = checkoutForm.querySelector('button[type="submit"]');
+                    const originalText = submitBtn ? submitBtn.innerHTML : '';
+                    if (submitBtn) {
+                        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing';
+                        submitBtn.disabled = true;
+                    }
+
+                    Swal.fire({
+                        title: 'Confirm Payment',
+                        text: 'Do you want to print the receipt after payment?',
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonText: 'Yes, print',
+                        cancelButtonText: 'No'
+                    }).then(choice => {
+                        const wantsPrint = !!choice.isConfirmed;
+                        const formData = new FormData(checkoutForm);
+
+                        fetch(checkoutForm.action, {
+                            method: checkoutForm.method || 'POST',
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest',
+                                'Accept': 'application/json'
+                            },
+                            body: formData
+                        })
+                        .then(response => {
+                            const contentType = response.headers.get('content-type') || '';
+                            if (contentType.includes('application/json')) {
+                                return response.json();
+                            }
+                            return response.text().then(text => {
+                                try {
+                                    return JSON.parse(text);
+                                } catch (err) {
+                                    return { success: false, message: 'Unexpected server response.' };
+                                }
+                            });
+                        })
+                        .then(data => {
+                            if (!data.success) {
+                                notyf.error(data.message || 'Checkout failed');
+                                if (submitBtn) {
+                                    submitBtn.innerHTML = originalText;
+                                    submitBtn.disabled = false;
+                                }
+                                return;
+                            }
+
+                            const parseOrderNumber = (payload) => {
+                                if (payload.order_number) return payload.order_number;
+                                if (payload.message) {
+                                    const match = payload.message.match(/OR Number:\s*(#OR\d+)/);
+                                    if (match) return match[1];
+                                }
+                                return null;
+                            };
+
+                            const orderNumber = parseOrderNumber(data);
+                            if (wantsPrint && orderNumber) {
+                                const receiptUrl = '{{ url('/cashier/orders/receipt') }}/' + encodeURIComponent(orderNumber);
+                                fetch(receiptUrl)
+                                    .then(r => r.text())
+                                    .then(receiptText => {
+                                        let iframe = document.getElementById('receiptPrintIframe');
+                                        if (!iframe) {
+                                            iframe = document.createElement('iframe');
+                                            iframe.id = 'receiptPrintIframe';
+                                            iframe.style.position = 'fixed';
+                                            iframe.style.width = '0';
+                                            iframe.style.height = '0';
+                                            iframe.style.border = '0';
+                                            iframe.style.visibility = 'hidden';
+                                            iframe.style.left = '-9999px';
+                                            document.body.appendChild(iframe);
+                                        }
+
+                                        iframe.onload = function() {
+                                            try {
+                                                iframe.contentWindow.focus();
+                                                iframe.contentWindow.print();
+                                            } catch (err) {
+                                                console.warn('Print failed on iframe', err);
+                                                notyf.error('Unable to print receipt automatically.');
+                                            }
+                                            setTimeout(() => window.location.reload(), 1000);
+                                        };
+
+                                        const doc = iframe.contentDocument || iframe.contentWindow.document;
+                                        doc.open();
+                                        doc.write('<!DOCTYPE html><html><head><title>Receipt</title><style>body{margin:0;padding:6px;font-family:Courier New,monospace;white-space:pre-wrap;}</style></head><body><pre>' + receiptText.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</pre></body></html>');
+                                        doc.close();
+                                    })
+                                    .catch(err => {
+                                        console.error('Unable to fetch receipt:', err);
+                                        notyf.error('Receipt fetch failed.');
+                                        window.location.reload();
+                                    });
+                            } else {
+                                window.location.reload();
+                            }
+                        })
+                        .catch(err => {
+                            console.error('Checkout error:', err);
+                            notyf.error('An unexpected error occurred.');
+                            if (submitBtn) {
+                                submitBtn.innerHTML = originalText;
+                                submitBtn.disabled = false;
+                            }
+                        });
+                    });
+                });
+            }
+
             document.body.addEventListener('click', function(e) {
                 const saveBtn = e.target.closest('#saveOrderBtn');
                 if (saveBtn) {
@@ -597,7 +716,6 @@
                 }
             });
 
-            // AJAX Cart Handling
             document.body.addEventListener('submit', function(e) {
                 if (e.target.matches('.pcard-form') || e.target.closest('.order-list form') || e.target.matches('#barcodeScanForm')) {
                     e.preventDefault();

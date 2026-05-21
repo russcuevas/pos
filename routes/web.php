@@ -162,6 +162,7 @@ Route::middleware(['cashier'])->group(function () {
     // CASHIER ORDERS
     Route::get('/cashier/orders', [CashierOrdersController::class, 'CashierOrdersPage'])->name('cashier.orders.page');
     Route::post('/cashier/orders/process-return', [CashierOrdersController::class, 'ProcessReturn'])->name('cashier.orders.process_return');
+    Route::get('/cashier/orders/receipt/{order_number}', [CashierOrdersController::class, 'PrintReceipt'])->name('cashier.orders.receipt');
 
     // CASHIER PENDING ORDERS
     Route::get('/cashier/pending_orders', [CashierPendingOrdersController::class, 'CashierPendingOrdersPage'])->name('cashier.pending_orders.page');

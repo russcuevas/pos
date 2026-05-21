@@ -231,6 +231,9 @@ class CashierPOSController extends Controller
             ->get();
 
         if ($cartItems->isEmpty()) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['success' => false, 'message' => 'Cart is empty!'], 422);
+            }
             return back()->with('error', 'Cart is empty!');
         }
 
@@ -249,6 +252,9 @@ class CashierPOSController extends Controller
         $discount_price = $request->discount_price ?? 0;
 
         if ($payment_amount < $order_total_price) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['success' => false, 'message' => 'Payment amount is less than total due!'], 422);
+            }
             return back()->with('error', 'Payment amount is less than total due!');
         }
 
@@ -305,6 +311,10 @@ class CashierPOSController extends Controller
         }
 
         CashiersCarts::where('cashier_id', $cashier_id)->delete();
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json(['success' => true, 'order_number' => $order_number, 'message' => 'Checkout Successful! OR Number: ' . $order_number]);
+        }
 
         return back()->with('success', 'Checkout Successful! OR Number: ' . $order_number);
     }
