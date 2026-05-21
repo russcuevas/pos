@@ -16,7 +16,7 @@
                     Original: ₱{{ number_format($order->original_total, 2) }}
                 </div>
             @endif
-            
+
             @if ($order->discount_price > 0)
                 <span style="color: #ef4444; font-size: 0.75rem; font-weight: 600;">
                     -₱{{ number_format($order->discount_price, 2) }} Discount
@@ -31,7 +31,7 @@
                 <div class="profit-text profit-info" style="color: #10b981; font-size: 0.85rem; font-weight: 700;">
                     Profit: ₱{{ number_format($order->total_profit, 2) }}
                 </div>
-                @if($order->total_refunded > 0)
+                @if ($order->total_refunded > 0)
                     <div class="text-danger" style="font-size: 0.85rem; font-weight: 700;">
                         Refunded: ₱{{ number_format($order->total_refunded, 2) }}
                     </div>
@@ -48,19 +48,23 @@
         <div class="order-items-list">
             @foreach ($order->items as $item)
                 @php $isFullyReturned = $item->remaining_quantity <= 0; @endphp
-                <div class="order-item-row" style="border-top: 1px solid #f1f5f9; padding: 10px 0; {{ $isFullyReturned ? 'opacity: 0.6;' : '' }}">
+                <div class="order-item-row"
+                    style="border-top: 1px solid #f1f5f9; padding: 10px 0; {{ $isFullyReturned ? 'opacity: 0.6;' : '' }}">
                     <div class="item-info">
-                        <span class="item-name" style="font-weight: 600; {{ $isFullyReturned ? 'text-decoration: line-through;' : '' }}">
+                        <span class="item-name"
+                            style="font-weight: 600; {{ $isFullyReturned ? 'text-decoration: line-through;' : '' }}">
                             {{ $item->quantity + 0 }}x {{ $item->product->product_name ?? 'Product' }}
                         </span>
-                        @if($item->returned_quantity > 0)
-                            <span class="badge {{ $isFullyReturned ? 'bg-secondary' : 'bg-warning text-dark' }} ms-1" style="font-size: 0.65rem;">
+                        @if ($item->returned_quantity > 0)
+                            <span class="badge {{ $isFullyReturned ? 'bg-secondary' : 'bg-warning text-dark' }} ms-1"
+                                style="font-size: 0.65rem;">
                                 {{ $isFullyReturned ? 'Returned' : 'Partially Returned (' . ($item->returned_quantity + 0) . ')' }}
                             </span>
                         @endif
                     </div>
                     <div class="text-end">
-                        <div class="item-price" style="font-weight: 700; {{ $isFullyReturned ? 'text-decoration: line-through;' : '' }}">
+                        <div class="item-price"
+                            style="font-weight: 700; {{ $isFullyReturned ? 'text-decoration: line-through;' : '' }}">
                             ₱{{ number_format($item->total_price, 2) }}
                         </div>
                         @if (!$isCancelled)

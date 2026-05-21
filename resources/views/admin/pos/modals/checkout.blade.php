@@ -98,7 +98,7 @@
                     </div>
 
                     <!-- Submit -->
-                    <button type="submit" class="btn w-100 py-3 fw-bold"
+                    <button type="button" id="confirmPaymentBtn" class="btn w-100 py-3 fw-bold"
                         style="background-color: #198754; color: #fff; border-radius: 8px;">Confirm
                         Payment</button>
                 </form>
@@ -106,3 +106,128 @@
         </div>
     </div>
 </div>
+    <script>
+        (function(){
+            function handleCheckoutSubmit(form){
+                console.log('checkout: submit intercepted');
+                const submitBtn = form.querySelector('button[type="submit"]');
+                if (submitBtn) submitBtn.disabled = true;
+
+                const url = form.action;
+                const fd = new FormData(form);
+
+                // Ask user first whether they want to print after payment
+                Swal.fire({
+                    title: 'Confirm Payment',
+                    text: 'Do you want to print the receipt after payment?',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, print',
+                    cancelButtonText: 'No'
+                }).then(choice => {
+                    const wantsPrint = !!choice.isConfirmed;
+
+                    let printWindowReady = null;
+                    const printReceipt = (receiptText) => {
+                        let iframe = document.getElementById('receiptPrintIframe');
+                        if (!iframe) {
+                            iframe = document.createElement('iframe');
+                            iframe.id = 'receiptPrintIframe';
+                            iframe.style.position = 'fixed';
+                            iframe.style.width = '0';
+                            iframe.style.height = '0';
+                            iframe.style.border = '0';
+                            iframe.style.visibility = 'hidden';
+                            iframe.style.left = '-9999px';
+                            document.body.appendChild(iframe);
+                        }
+
+                        printWindowReady = iframe;
+                        iframe.onload = function() {
+                            try {
+                                iframe.contentWindow.focus();
+                                iframe.contentWindow.print();
+                            } catch (err) {
+                                console.warn('Print failed on iframe', err);
+                                alert('Unable to print receipt automatically.');
+                            }
+                            setTimeout(() => window.location.reload(), 1000);
+                        };
+
+                        const doc = iframe.contentDocument || iframe.contentWindow.document;
+                        doc.open();
+                        doc.write('<!DOCTYPE html><html><head><title>Receipt</title><style>body{margin:0;padding:6px;font-family:Courier New,monospace;white-space:pre-wrap;}</style></head><body><pre>' + receiptText.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</pre></body></html>');
+                        doc.close();
+                    };
+
+                    // Proceed with payment request
+                    fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        },
+                        body: fd
+                    })
+                    .then(response => {
+                        const ct = response.headers.get('content-type') || '';
+                        if (ct.includes('application/json')) return response.json();
+                        return response.text().then(text => {
+                            try { return JSON.parse(text); }
+                            catch (err) { return { success: true, redirect: response.url }; }
+                        });
+                    })
+                    .then(data => {
+                        console.log('checkout: response', data);
+                        if (data.success) {
+                            if (wantsPrint) {
+                                const orderNumber = data.order_number || (data.order && data.order.order_number) || (data.redirect ? data.redirect.split('/').pop() : null);
+                                const receiptUrl = "{{ url('/admin/orders/receipt') }}/" + encodeURIComponent(orderNumber || '');
+                                fetch(receiptUrl)
+                                    .then(r => r.text())
+                                    .then(printReceipt)
+                                    .catch(err => {
+                                        console.error('receipt fetch error', err);
+                                        alert('Unable to fetch receipt for printing.');
+                                        window.location.reload();
+                                    });
+                            } else {
+                                window.location.reload();
+                            }
+                        } else {
+                            console.warn('checkout: server returned failure', data);
+                            alert(data.message || 'Payment failed');
+                            if (submitBtn) submitBtn.disabled = false;
+                        }
+                    })
+                    .catch(err => {
+                        console.error('checkout: error', err);
+                        alert('An unexpected error occurred.');
+                        if (submitBtn) submitBtn.disabled = false;
+                    });
+                });
+            }
+
+            // Capture submit events for the checkout form even if submitted by other scripts
+            document.addEventListener('submit', function(e){
+                const form = e.target;
+                if (!form || form.id !== 'checkoutForm') return;
+                e.preventDefault();
+                handleCheckoutSubmit(form);
+            }, true);
+
+            // Also attach directly in case the element is submitted programmatically
+            const directForm = document.getElementById('checkoutForm');
+            if (directForm) directForm.addEventListener('submit', function(e){ e.preventDefault(); handleCheckoutSubmit(this); });
+
+            // Attach click listener to the confirm button to prevent default form submission
+            const confirmBtn = document.getElementById('confirmPaymentBtn');
+            if (confirmBtn) {
+                confirmBtn.addEventListener('click', function(e){
+                    e.preventDefault();
+                    const form = document.getElementById('checkoutForm');
+                    if (form) handleCheckoutSubmit(form);
+                });
+            }
+        })();
+    </script>

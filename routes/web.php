@@ -107,6 +107,7 @@ Route::middleware(['admin'])->group(function () {
     // ADMIN ORDERS
     Route::get('/admin/orders', [AdminOrdersController::class, 'AdminOrdersPage'])->name('admin.orders.page');
     Route::post('/admin/orders/process-return', [AdminOrdersController::class, 'ProcessReturn'])->name('admin.orders.process_return');
+    Route::get('/admin/orders/receipt/{order_number}', [AdminOrdersController::class, 'PrintReceipt'])->name('admin.orders.receipt');
 
     // ADMIN FINANCE
     Route::get('/admin/finance', [AdminFinanceController::class, 'AdminFinancePage'])->name('admin.finance.page');

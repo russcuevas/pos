@@ -605,6 +605,61 @@
             color: white;
         }
     </style>
+    <style>
+        @media print {
+            @page {
+                size: 58mm auto;
+                margin: 0;
+            }
+
+            body * {
+                visibility: hidden !important;
+            }
+
+            #receiptContent,
+            #receiptContent * {
+                visibility: visible !important;
+            }
+
+            #receiptContent {
+                position: absolute !important;
+                left: 0 !important;
+                top: 0 !important;
+                width: 58mm !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                background: white !important;
+            }
+
+            #receiptContent pre {
+                margin: 0 !important;
+                padding: 3mm !important;
+                font-family: "Courier New", monospace !important;
+                font-size: 11px !important;
+                line-height: 1.2 !important;
+                white-space: pre !important;
+            }
+
+            .modal,
+            .modal-dialog,
+            .modal-content,
+            .modal-body {
+                position: static !important;
+                width: 58mm !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                box-shadow: none !important;
+                border: none !important;
+            }
+
+            .modal-footer,
+            .modal-backdrop,
+            .top-nav,
+            .pos-wrap {
+                display: none !important;
+            }
+        }
+    </style>
 </head>
 
 <body class="pos-page">
@@ -678,9 +733,11 @@
                 </div>
                 <div class="modal-footer border-0 p-3 bg-light" style="border-radius: 0 0 12px 12px;">
                     <button type="button" class="btn btn-secondary px-4 fw-bold" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary px-4 fw-bold" onclick="window.print()">
-                        <i class="bi bi-printer me-2"></i> Print
+                    <button type="button" class="btn btn-sm btn-primary" id="btnPrintReceipt">
+                        <i class="bi bi-printer me-1"></i> Print
                     </button>
+
+                    <iframe id="printFrame" style="display:none;"></iframe>
                 </div>
             </div>
         </div>
@@ -828,16 +885,59 @@
         });
 
         // --- Print Logic ---
+        // --- Print Logic ---
         const receiptModal = new bootstrap.Modal(document.getElementById('receiptModal'));
         const receiptContent = document.getElementById('receiptContent');
 
+        let currentOrderNumber = null;
+
         document.addEventListener('click', function(e) {
             const btn = e.target.closest('.btn-print-receipt');
-            if (btn) {
-                const orderData = JSON.parse(btn.getAttribute('data-order-json'));
-                renderReceipt(orderData);
-                receiptModal.show();
+
+            if (!btn) return;
+
+            const orderData = JSON.parse(btn.getAttribute('data-order-json'));
+
+            currentOrderNumber = orderData.order_number;
+
+            renderReceipt(orderData);
+            receiptModal.show();
+        });
+
+        document.getElementById('btnPrintReceipt').addEventListener('click', function() {
+            if (!currentOrderNumber) {
+                alert('No order selected.');
+                return;
             }
+
+            const receiptUrl = "{{ url('/admin/orders/receipt') }}/" + encodeURIComponent(currentOrderNumber);
+
+            fetch(receiptUrl)
+                .then(response => response.text())
+                .then(receiptText => {
+                    receiptContent.innerHTML = `
+                <pre style="
+                    margin:0;
+                    padding:5px;
+                    font-family:'Courier New', monospace;
+                    font-size:11px;
+                    line-height:1.2;
+                    white-space:pre;
+                    color:#000;
+                    background:#fff;
+                "></pre>
+            `;
+
+                    receiptContent.querySelector('pre').textContent = receiptText;
+
+                    setTimeout(function() {
+                        window.print();
+                    }, 300);
+                })
+                .catch(error => {
+                    console.error(error);
+                    alert('Unable to print receipt.');
+                });
         });
 
         function renderReceipt(order) {
@@ -879,22 +979,22 @@
                         <span>₱${parseFloat(order.original_total + (parseFloat(order.discount_price) || 0)).toFixed(2)}</span>
                     </div>
                     ${order.discount_price > 0 ? `
-                                <div class="summary-row">
-                                    <span style="color: #ef4444;">Discount</span>
-                                    <span style="color: #ef4444;">-₱${parseFloat(order.discount_price).toFixed(2)}</span>
-                                </div>
-                                ` : ''}
+                                                        <div class="summary-row">
+                                                            <span style="color: #ef4444;">Discount</span>
+                                                            <span style="color: #ef4444;">-₱${parseFloat(order.discount_price).toFixed(2)}</span>
+                                                        </div>
+                                                        ` : ''}
 
                     ${order.total_refunded > 0 ? `
-                                <div class="summary-row fw-bold border-top pt-2 mt-2" style="border-top-style: dashed !important;">
-                                    <span>Original Total</span>
-                                    <span>₱${parseFloat(order.original_total).toFixed(2)}</span>
-                                </div>
-                                <div class="summary-row" style="color: #ef4444;">
-                                    <span>Refunds</span>
-                                    <span>-₱${parseFloat(order.total_refunded).toFixed(2)}</span>
-                                </div>
-                            ` : ''}
+                                                        <div class="summary-row fw-bold border-top pt-2 mt-2" style="border-top-style: dashed !important;">
+                                                            <span>Original Total</span>
+                                                            <span>₱${parseFloat(order.original_total).toFixed(2)}</span>
+                                                        </div>
+                                                        <div class="summary-row" style="color: #ef4444;">
+                                                            <span>Refunds</span>
+                                                            <span>-₱${parseFloat(order.total_refunded).toFixed(2)}</span>
+                                                        </div>
+                                                    ` : ''}
 
                     <div class="summary-row total">
                         <span>${order.total_refunded > 0 ? 'Net Total' : 'Total'}</span>
@@ -991,25 +1091,25 @@
                                 </div>
                             </div>
                             ${isFullyReturned ? `
-                                        <div class="ms-auto"><span class="badge bg-secondary">Fully Returned</span></div>
-                                    ` : `
-                                        <div class="ms-auto return-checkbox-wrapper" style="width: 28px; height: 28px;">
-                                            <i class="bi bi-check-lg" style="font-size: 1rem;"></i>
-                                        </div>
-                                    `}
+                                                                <div class="ms-auto"><span class="badge bg-secondary">Fully Returned</span></div>
+                                                            ` : `
+                                                                <div class="ms-auto return-checkbox-wrapper" style="width: 28px; height: 28px;">
+                                                                    <i class="bi bi-check-lg" style="font-size: 1rem;"></i>
+                                                                </div>
+                                                            `}
                         </div>
 
                         <div class="return-refund-details w-100 mt-2 pt-3" style="border-top: 1px solid #e0f2fe;">
                             @php $fractionalQtys = [0.25, 0.33, 0.5, 0.75]; @endphp
                             ${ (remainingQty > 1 && ![0.25, 0.33, 0.5, 0.75].includes(Math.round(remainingQty * 100) / 100)) ? `
-                                    <div class="return-input-group justify-content-between">
-                                        <div class="return-input-label" style="font-size: 0.85rem; color: #64748b;">RETURN QTY</div>
-                                        <div class="return-input-wrapper" style="max-width: 200px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-                                            <div class="return-input-prefix bg-white"><i class="bi bi-box-seam"></i></div>
-                                            <input type="number" class="return-input qty-input" value="${remainingQty}" max="${remainingQty}" min="0.01" step="any" data-unit-price="${unitPrice}">
-                                        </div>
-                                    </div>
-                                    ` : `<input type="hidden" class="qty-input" value="${remainingQty}" data-unit-price="${unitPrice}">` }
+                                                            <div class="return-input-group justify-content-between">
+                                                                <div class="return-input-label" style="font-size: 0.85rem; color: #64748b;">RETURN QTY</div>
+                                                                <div class="return-input-wrapper" style="max-width: 200px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                                                                    <div class="return-input-prefix bg-white"><i class="bi bi-box-seam"></i></div>
+                                                                    <input type="number" class="return-input qty-input" value="${remainingQty}" max="${remainingQty}" min="0.01" step="any" data-unit-price="${unitPrice}">
+                                                                </div>
+                                                            </div>
+                                                            ` : `<input type="hidden" class="qty-input" value="${remainingQty}" data-unit-price="${unitPrice}">` }
                             <div class="return-input-group justify-content-between">
                                 <div class="return-input-label" style="font-size: 0.85rem; color: #64748b;">REFUND AMT.</div>
                                 <div class="return-input-wrapper" style="max-width: 200px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">

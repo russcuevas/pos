@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>POS System</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <link
@@ -133,7 +134,7 @@
             </form>
 
             <!-- Alpha Filter (CSS-only radio) -->
-            <div class="alpha-row">4800131291683
+            <div class="alpha-row">
 
                 <input type="radio" name="alpha" id="a-all" checked>
                 <label class="alpha-lbl" for="a-all">All</label>
@@ -306,7 +307,6 @@
                     <i class="bi bi-bag-check"></i> Checkout
                 </button>
                 <div class="bottom-actions">
-                    <button class="bot-btn cam"><i class="bi bi-camera"></i> Camera</button>
                     <button class="bot-btn cust" data-bs-toggle="modal" data-bs-target="#customItemModal"><i
                             class="bi bi-plus-circle"></i> Custom</button>
                     @if ($cartItems->isEmpty())

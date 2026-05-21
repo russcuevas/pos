@@ -49,7 +49,7 @@ class AdminOrdersController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
-        $returns = $returnItems->groupBy(function($item) {
+        $returns = $returnItems->groupBy(function ($item) {
             return $item->created_at->format('Y-m-d H:i:s');
         })->map(function ($batchItems) {
             return (object) [
@@ -175,5 +175,110 @@ class AdminOrdersController extends Controller
             DB::rollback();
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
+    }
+
+    public function PrintReceipt($order_number)
+    {
+        $items = Orders::where('order_number', $order_number)
+            ->with(['product', 'returnItems'])
+            ->get();
+
+        if ($items->isEmpty()) {
+            abort(404, 'Order not found');
+        }
+
+        $order = $this->formatOrder($items, $order_number);
+
+        $lineWidth = 32;
+        $output = "";
+
+        // HEADER
+        $output .= str_pad("SAMMER'S STORE", $lineWidth, " ", STR_PAD_BOTH) . "\n";
+        $output .= str_pad("Order Details", $lineWidth, " ", STR_PAD_BOTH) . "\n";
+        $output .= str_pad("Receipt " . $order->order_number, $lineWidth, " ", STR_PAD_BOTH) . "\n";
+        $output .= str_pad($order->updated_at->format('Y-m-d H:i'), $lineWidth, " ", STR_PAD_BOTH) . "\n";
+        $output .= str_pad("Customer: " . ($order->customer_name ?: 'New Customer'), $lineWidth, " ", STR_PAD_BOTH) . "\n";
+        $output .= str_repeat("-", $lineWidth) . "\n";
+
+        // ITEMS
+        foreach ($order->items as $item) {
+            $isReturned = $item->returned_quantity >= $item->quantity;
+
+            $qty = $item->quantity + 0;
+            $name = $item->product ? $item->product->product_name : 'Product';
+            $priceText = "P" . number_format($item->total_price, 2);
+
+            if ($isReturned) {
+                $name = "[RETURNED] " . $name;
+            }
+
+            $leftText = $qty . "x " . $name;
+            $nameWidth = $lineWidth - strlen($priceText);
+
+            $wrappedName = wordwrap($leftText, $nameWidth, "\n", true);
+            $nameLines = explode("\n", $wrappedName);
+
+            foreach ($nameLines as $index => $line) {
+                if ($index === 0) {
+                    $output .= str_pad($line, $nameWidth);
+                    $output .= $priceText . "\n";
+                } else {
+                    $output .= $line . "\n";
+                }
+            }
+        }
+
+        $output .= str_repeat("-", $lineWidth) . "\n";
+
+        // SUBTOTAL
+        $subtotal = "P" . number_format($order->original_total + ($order->discount_price ?? 0), 2);
+        $output .= str_pad("Subtotal", $lineWidth - strlen($subtotal));
+        $output .= $subtotal . "\n";
+
+        // DISCOUNT
+        if (($order->discount_price ?? 0) > 0) {
+            $discount = "-P" . number_format($order->discount_price, 2);
+            $output .= str_pad("Discount", $lineWidth - strlen($discount));
+            $output .= $discount . "\n";
+        }
+
+        // REFUNDS
+        if (($order->total_refunded ?? 0) > 0) {
+            $output .= str_repeat("-", $lineWidth) . "\n";
+
+            $originalTotal = "P" . number_format($order->original_total, 2);
+            $output .= str_pad("Original Total", $lineWidth - strlen($originalTotal));
+            $output .= $originalTotal . "\n";
+
+            $refunds = "-P" . number_format($order->total_refunded, 2);
+            $output .= str_pad("Refunds", $lineWidth - strlen($refunds));
+            $output .= $refunds . "\n";
+        }
+
+        $output .= str_repeat("-", $lineWidth) . "\n";
+
+        // TOTAL
+        $totalLabel = ($order->total_refunded ?? 0) > 0 ? "NET TOTAL" : "TOTAL";
+        $totalText = "P" . number_format($order->total_amount, 2);
+
+        $output .= str_pad($totalLabel, $lineWidth - strlen($totalText));
+        $output .= $totalText . "\n";
+
+        $output .= str_repeat("-", $lineWidth) . "\n";
+
+        // PAYMENT
+        $cash = "P" . number_format($order->payment_amount ?? 0, 2);
+        $output .= str_pad("Cash", $lineWidth - strlen($cash));
+        $output .= $cash . "\n";
+
+        $change = "P" . number_format($order->change_amount ?? 0, 2);
+        $output .= str_pad("Change Given", $lineWidth - strlen($change));
+        $output .= $change . "\n";
+
+        $output .= str_repeat("-", $lineWidth) . "\n";
+        $output .= str_pad("Thank you for your order!", $lineWidth, " ", STR_PAD_BOTH) . "\n\n\n";
+
+        return response($output)
+            ->header('Content-Type', 'text/plain');
     }
 }

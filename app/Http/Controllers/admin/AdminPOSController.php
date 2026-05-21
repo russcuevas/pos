@@ -247,6 +247,13 @@ class AdminPOSController extends Controller
 
         CashiersCarts::where('admin_id', $admin_id)->delete();
 
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'order_number' => $order_number,
+            ]);
+        }
+
         return back()->with('success', 'Checkout Successful! OR Number: ' . $order_number);
     }
 

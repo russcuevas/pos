@@ -398,6 +398,34 @@ body.dark-mode .cart-fab:hover {
     background: #15803d;
 }
 
+/* Print: hide scrollbars and prevent overflow (no HTML/JS changes) */
+@media print {
+    /* Hide scrollbars in WebKit-based browsers */
+    *::-webkit-scrollbar {
+        display: none !important;
+        width: 0 !important;
+        height: 0 !important;
+    }
+
+    /* Hide scrollbars in Firefox/IE */
+    * {
+        scrollbar-width: none !important;
+        -ms-overflow-style: none !important;
+    }
+
+    /* Prevent any element from causing scrollbars in print */
+    html, body, #receiptContent {
+        overflow: hidden !important;
+        height: auto !important;
+    }
+
+    /* Ensure pre content wraps instead of causing horizontal scroll */
+    #receiptContent pre {
+        white-space: pre-wrap !important;
+        overflow: visible !important;
+    }
+}
+
 body.dark-mode .top-nav {
     background: #0f172a;
     border-bottom: 1px solid var(--border);
