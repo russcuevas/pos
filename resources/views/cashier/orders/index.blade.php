@@ -605,6 +605,61 @@
             color: white;
         }
     </style>
+    <style>
+        @media print {
+            @page {
+                size: 58mm auto;
+                margin: 0;
+            }
+
+            body * {
+                visibility: hidden !important;
+            }
+
+            #receiptContent,
+            #receiptContent * {
+                visibility: visible !important;
+            }
+
+            #receiptContent {
+                position: absolute !important;
+                left: 0 !important;
+                top: 0 !important;
+                width: 58mm !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                background: white !important;
+            }
+
+            #receiptContent pre {
+                margin: 0 !important;
+                padding: 3mm !important;
+                font-family: "Courier New", monospace !important;
+                font-size: 11px !important;
+                line-height: 1.2 !important;
+                white-space: pre !important;
+            }
+
+            .modal,
+            .modal-dialog,
+            .modal-content,
+            .modal-body {
+                position: static !important;
+                width: 58mm !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                box-shadow: none !important;
+                border: none !important;
+            }
+
+            .modal-footer,
+            .modal-backdrop,
+            .top-nav,
+            .pos-wrap {
+                display: none !important;
+            }
+        }
+    </style>
 </head>
 
 <body class="pos-page">
@@ -676,7 +731,7 @@
                 </div>
                 <div class="modal-footer border-0 p-3 bg-light" style="border-radius: 0 0 12px 12px;">
                     <button type="button" class="btn btn-secondary px-4 fw-bold" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary px-4 fw-bold" onclick="window.print()">
+                    <button type="button" class="btn btn-primary px-4 fw-bold" id="btnPrintReceipt">
                         <i class="bi bi-printer me-2"></i> Print
                     </button>
                 </div>
@@ -828,14 +883,50 @@
         // --- Print Logic ---
         const receiptModal = new bootstrap.Modal(document.getElementById('receiptModal'));
         const receiptContent = document.getElementById('receiptContent');
+        let currentOrderNumber = null;
 
         document.addEventListener('click', function(e) {
             const btn = e.target.closest('.btn-print-receipt');
             if (btn) {
                 const orderData = JSON.parse(btn.getAttribute('data-order-json'));
+                currentOrderNumber = orderData.order_number;
                 renderReceipt(orderData);
                 receiptModal.show();
             }
+        });
+
+        document.getElementById('btnPrintReceipt').addEventListener('click', function() {
+            if (!currentOrderNumber) {
+                alert('No order selected.');
+                return;
+            }
+
+            const receiptUrl = "{{ url('/cashier/orders/receipt') }}/" + encodeURIComponent(currentOrderNumber);
+            fetch(receiptUrl)
+                .then(response => response.text())
+                .then(receiptText => {
+                    receiptContent.innerHTML = `
+                <pre style="
+                    margin:0;
+                    padding:5px;
+                    font-family:'Courier New', monospace;
+                    font-size:11px;
+                    line-height:1.2;
+                    white-space:pre;
+                    color:#000;
+                    background:#fff;
+                "></pre>
+            `;
+                    receiptContent.querySelector('pre').textContent = receiptText;
+
+                    setTimeout(function() {
+                        window.print();
+                    }, 300);
+                })
+                .catch(error => {
+                    console.error(error);
+                    alert('Unable to print receipt.');
+                });
         });
 
         function renderReceipt(order) {
