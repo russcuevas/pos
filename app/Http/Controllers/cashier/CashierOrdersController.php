@@ -9,8 +9,10 @@ use App\Models\Orders;
 use App\Models\Products;
 use App\Models\OrdersChats;
 use App\Models\ReturnItems;
+use App\Models\PettyCash;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Carbon;
 
 class CashierOrdersController extends Controller
 {
@@ -30,9 +32,32 @@ class CashierOrdersController extends Controller
             ->distinct('order_number')
             ->count('order_number');
 
+        $cashier_id = Auth::guard('cashier')->id();
+        $pettyCash = PettyCash::where('cashier_id', $cashier_id)
+            ->whereDate('opening_time', Carbon::today())
+            ->first();
+
+        $salesToday = 0;
+        $walkInSales = 0;
+        $onlineSales = 0;
+
+        if ($pettyCash) {
+            $baseQuery = Orders::where('cashier_id', $cashier_id)
+                ->where('order_status', 'Completed')
+                ->whereDate('created_at', Carbon::today());
+
+            $salesToday = $baseQuery->sum('total_price');
+            $walkInSales = (clone $baseQuery)->where('order_type', 'Walk In')->sum('total_price');
+            $onlineSales = (clone $baseQuery)->where('order_type', '!=', 'Walk In')->sum('total_price');
+        }
+
         return view('cashier.orders.index', [
             'orders' => $groupedOrders,
-            'pending_count' => $pending_count
+            'pending_count' => $pending_count,
+            'pettyCash' => $pettyCash,
+            'salesToday' => $salesToday,
+            'walkInSales' => $walkInSales,
+            'onlineSales' => $onlineSales,
         ]);
     }
 

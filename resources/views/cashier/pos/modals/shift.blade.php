@@ -102,7 +102,7 @@
                 <div class="text-center mb-4">
                     <div class="shift-pull-bar"
                         style="width: 40px; height: 4px; border-radius: 2px; margin: 0 auto 15px auto;"></div>
-                    <h4 class="fw-bold shift-text-main mb-1">Good afternoon,
+                    <h4 class="fw-bold shift-text-main mb-1">Hello,
                         {{ Auth::guard('cashier')->user()->fullname ?? 'Sam' }}!</h4>
                     <div class="shift-text-muted" style="font-size: 0.9rem;">
                         <i class="bi bi-calendar3 me-1"></i> <span id="realtime-clock">{{ \Carbon\Carbon::now()->format('l, F d, Y - h:i A') }}</span>

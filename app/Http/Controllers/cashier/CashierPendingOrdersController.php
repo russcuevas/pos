@@ -9,6 +9,8 @@ class CashierPendingOrdersController extends Controller
 {
     public function CashierPendingOrdersPage()
     {
+        $cashier_id = \Illuminate\Support\Facades\Auth::guard('cashier')->id();
+        
         $orders = \App\Models\Orders::whereNotIn('order_status', ['Completed', 'Cancelled'])
             ->with('product')
             ->orderBy('created_at', 'desc')
@@ -19,9 +21,14 @@ class CashierPendingOrdersController extends Controller
             return $this->formatOrder($items, $orderNumber);
         });
 
+        $pettyCash = \App\Models\PettyCash::where('cashier_id', $cashier_id)
+            ->whereDate('opening_time', \Illuminate\Support\Carbon::today())
+            ->first();
+
         return view('cashier.pending_orders.index', [
             'orders' => $groupedOrders,
-            'products' => \App\Models\Products::where('is_show', 1)->where('quantity', '>', 0)->get()
+            'products' => \App\Models\Products::where('is_show', 1)->where('quantity', '>', 0)->get(),
+            'pettyCash' => $pettyCash
         ]);
     }
 

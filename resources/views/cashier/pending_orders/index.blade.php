@@ -466,12 +466,14 @@
                     </a>
                     <div class="admin-chip"><i class="bi bi-shield-check"></i>
                         {{ strtoupper(Auth::guard('cashier')->user()->fullname) }}</div>
-                    <form action="{{ route('cashier.logout') }}" method="POST">
-                        @csrf
-                        <button type="submit" class="nav-icon-pill border-0 bg-transparent" style="color: white;">
-                            <i class="bi bi-box-arrow-right"></i>
-                        </button>
-                    </form>
+                    <div class="admin-chip">
+                        ₱
+                        {{ $pettyCash ? number_format($pettyCash->beginning_balance, 2) : '0.00' }}
+                    </div>
+                    <button type="button" data-bs-toggle="modal" data-bs-target="#shiftModal"
+                        class="nav-icon-pill border-0 bg-transparent" style="color: white;" title="View Shift / Logout">
+                        <i class="bi bi-grid-3x2-gap-fill"></i>
+                    </button>
                 </div>
             </div>
         </div>
@@ -636,6 +638,8 @@
         </div>
     </div>
 
+    @include('cashier.pos.modals.shift')
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -680,6 +684,16 @@
                 applyTheme(nextTheme);
             });
         }
+
+        @if (!isset($pettyCash) || !$pettyCash)
+            document.addEventListener('DOMContentLoaded', function() {
+                const shiftModal = document.getElementById('shiftModal');
+                if (shiftModal) {
+                    const modal = new bootstrap.Modal(shiftModal);
+                    modal.show();
+                }
+            });
+        @endif
 
         // AJAX Global Config
         const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
