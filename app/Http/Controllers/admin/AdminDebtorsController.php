@@ -200,4 +200,68 @@ class AdminDebtorsController extends Controller
 
         return redirect()->back()->with('success', 'Debtor account deleted successfully!');
     }
+
+    public function PrintDebtorsReceipt($batch_number)
+    {
+        $items = DebtorsItems::where('batch_number', $batch_number)->get();
+
+        if ($items->isEmpty()) {
+            abort(404, 'Receipt not found');
+        }
+
+        $debtor = DebtorsAccount::find($items->first()->debtor_id);
+        $lineWidth = 32;
+        $output = "";
+
+        $output .= str_pad("SAMMER'S STORE", $lineWidth, " ", STR_PAD_BOTH) . "\n";
+        $output .= str_pad("Debt Receipt", $lineWidth, " ", STR_PAD_BOTH) . "\n";
+        $output .= str_pad("Batch: " . $batch_number, $lineWidth, " ", STR_PAD_BOTH) . "\n";
+        $output .= str_pad($items->first()->created_at->format('Y-m-d H:i'), $lineWidth, " ", STR_PAD_BOTH) . "\n";
+        $output .= str_pad("Customer: " . ($debtor?->customer_name ?: 'N/A'), $lineWidth, " ", STR_PAD_BOTH) . "\n";
+        $output .= str_repeat("-", $lineWidth) . "\n";
+
+        $totalDebt = 0;
+
+        foreach ($items as $item) {
+            $qty = $item->quantity + 0;
+            $title = 'Custom Item';
+            $price = $item->custom_price ?? 0;
+
+            if (!empty($item->products_id)) {
+                $product = Products::find($item->products_id);
+                $title = $product?->product_name ?? 'Product';
+                $price = $product?->selling_price ?? 0;
+            } elseif (!empty($item->custom_entry)) {
+                $title = $item->custom_entry;
+            }
+
+            $itemTotal = $price * $qty;
+            $totalDebt += $itemTotal;
+
+            $leftText = $qty . "x " . $title;
+            $priceText = "P" . number_format($itemTotal, 2);
+            $nameWidth = $lineWidth - strlen($priceText);
+            $wrappedName = wordwrap($leftText, $nameWidth, "\n", true);
+            $nameLines = explode("\n", $wrappedName);
+
+            foreach ($nameLines as $index => $line) {
+                if ($index === 0) {
+                    $output .= str_pad($line, $nameWidth);
+                    $output .= $priceText . "\n";
+                } else {
+                    $output .= $line . "\n";
+                }
+            }
+        }
+
+        $output .= str_repeat("-", $lineWidth) . "\n";
+        $totalText = "P" . number_format($totalDebt, 2);
+        $output .= str_pad("Total Debt", $lineWidth - strlen($totalText));
+        $output .= $totalText . "\n";
+        $output .= str_repeat("-", $lineWidth) . "\n";
+        $output .= str_pad("Thank you for your order!", $lineWidth, " ", STR_PAD_BOTH) . "\n\n\n";
+
+        return response($output)
+            ->header('Content-Type', 'text/plain');
+    }
 }

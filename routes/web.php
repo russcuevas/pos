@@ -119,6 +119,7 @@ Route::middleware(['admin'])->group(function () {
     Route::get('/admin/debtors/{id}/view', [AdminDebtorsController::class, 'AdminDebtorsView'])->name('admin.debtors.view');
     Route::post('/admin/debtors/{id}/add-batch', [AdminDebtorsController::class, 'AdminDebtorsAddBatch'])->name('admin.debtors.add_batch');
     Route::post('/admin/debtors/{id}/add-payment', [AdminDebtorsController::class, 'AdminDebtorsAddPayment'])->name('admin.debtors.add_payment');
+    Route::get('/admin/debtors/receipt/{batch_number}', [AdminDebtorsController::class, 'PrintDebtorsReceipt'])->name('admin.debtors.receipt');
     Route::delete('/admin/debtors/{id}/delete', [AdminDebtorsController::class, 'AdminDebtorsDelete'])->name('admin.debtors.delete');
 });
 

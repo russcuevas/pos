@@ -959,7 +959,7 @@
                             @endforeach
 
                             <div class="details-footer">
-                                <button class="btn-detail btn-detail-print open-receipt-modal"
+                                <button type="button" class="btn-detail btn-detail-print open-receipt-modal"
                                     data-debt-id="{{ $item['batch_items']->first()->batch_number ?? 'N/A' }}"
                                     data-date="{{ $item['created_at']->format('n/j/Y') }}"
                                     data-time="{{ $item['created_at']->format('g:i A') }}"
@@ -1166,6 +1166,9 @@
                             </div>
 
                             <div class="receipt-divider"></div>
+
+                            <pre id="receiptRawContent" class="receipt-raw-content d-none"
+                                style="white-space: pre-wrap; font-family: 'Courier New', monospace; font-size: 0.85rem; margin: 0; padding: 20px; background: #fff; color: #111; border-radius: 0 0 12px 12px; display: none; overflow-x: auto;"></pre>
 
                             <div id="receiptItemsList">
                                 <!-- Items will be injected here -->
@@ -1443,47 +1446,46 @@
 
             // Handle Receipt Modal Opening
             const receiptModal = new bootstrap.Modal(document.getElementById('receiptModal'));
+            const receiptRawContent = document.getElementById('receiptRawContent');
+            const receiptItemsList = document.getElementById('receiptItemsList');
+            const receiptTotalRow = document.querySelector('.receipt-total-row');
+            const receiptHeader = document.querySelector('.receipt-header');
+            const receiptMeta = document.querySelector('.receipt-meta');
+            const receiptDividers = document.querySelectorAll('.receipt-divider');
+            const receiptThanks = document.querySelector('.receipt-thanks');
+
             document.querySelectorAll('.open-receipt-modal').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const data = {
-                        debtId: this.getAttribute('data-debt-id'),
-                        date: this.getAttribute('data-date'),
-                        time: this.getAttribute('data-time'),
-                        customer: this.getAttribute('data-customer'),
-                        items: JSON.parse(this.getAttribute('data-items'))
-                    };
+                btn.addEventListener('click', async function() {
+                    const batchNumber = this.getAttribute('data-debt-id');
 
-                    document.getElementById('receiptDate').textContent = data.date;
-                    document.getElementById('receiptTime').textContent = data.time;
-                    document.getElementById('receiptDebtNo').textContent = `Debt #: ${data.debtId}`;
-                    document.getElementById('receiptCustomer').textContent =
-                        `Customer: ${data.customer}`;
+                    if (!batchNumber) {
+                        alert('Unable to print receipt: missing debt batch number.');
+                        return;
+                    }
 
-                    const list = document.getElementById('receiptItemsList');
-                    list.innerHTML = '';
-                    let total = 0;
+                    receiptRawContent.textContent = 'Loading receipt...';
+                    receiptRawContent.classList.remove('d-none');
+                    receiptRawContent.style.display = 'block';
+                    receiptItemsList.innerHTML = '';
+                    if (receiptTotalRow) receiptTotalRow.style.display = 'none';
+                    if (receiptHeader) receiptHeader.style.display = 'none';
+                    if (receiptMeta) receiptMeta.style.display = 'none';
+                    receiptDividers.forEach(div => div.style.display = 'none');
+                    if (receiptThanks) receiptThanks.style.display = 'none';
 
-                    data.items.forEach(item => {
-                        const itemTotal = item.price * item.quantity;
-                        total += itemTotal;
+                    try {
+                        const response = await fetch(`/admin/debtors/receipt/${encodeURIComponent(batchNumber)}`);
+                        if (!response.ok) {
+                            throw new Error('Receipt not found');
+                        }
 
-                        const row = document.createElement('div');
-                        row.className = 'receipt-item';
-                        row.innerHTML = `
-                            <div class="receipt-item-top">
-                                <span>${item.title}</span>
-                                <span>₱${itemTotal.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
-                            </div>
-                            <div class="receipt-item-bottom">
-                                ${item.quantity} x ₱${item.price.toLocaleString(undefined, {minimumFractionDigits: 2})}
-                            </div>
-                        `;
-                        list.appendChild(row);
-                    });
-
-                    document.getElementById('receiptTotalAmount').textContent =
-                        `₱${total.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
-                    receiptModal.show();
+                        const text = await response.text();
+                        receiptRawContent.textContent = text;
+                        receiptModal.show();
+                    } catch (error) {
+                        console.error('Receipt fetch error:', error);
+                        alert('Failed to load receipt. Please refresh and try again.');
+                    }
                 });
             });
 
